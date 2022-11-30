@@ -53,12 +53,12 @@ def service_connection(key, mask):
 
 
 def sending_data(_type):
-    if _type == 0 and game.status == SETUP:
+    if _type == PKT_HELLO and game.status == SETUP:
         # if game.user1.status 
         yield pkt_accept(16855,True).sending_data()
         yield pkt_player(id=16855,n=20,m=5,k=2,location=Coordinates(1,2)).sending_data()
-
-    
+    elif _type == PKT_LOCATION_SHIP and game.status == SETUP:
+        yield pkt_check_location(id=16855,check=1).sending_data()
 
 
 def main(host, port, _textbox:Text):

@@ -34,8 +34,7 @@ class Window(tk.Tk):
         frame4 = tk.Frame(frame3)
         frame4.pack(side="right")
 
-        test = tk.Text(frame4,width=100,height=10)
-        #test.pack()
+        self.textbox = tk.Text(frame4,width=50,height=50)
 
         # Undo = tk.Button(frame1, text="Undo", width=10,  # nút quay lại
         #                  command=partial(self.Undo, synchronized=True))
@@ -84,33 +83,58 @@ class Window(tk.Tk):
         while self.isRunning :
             rev_pkt = self.client_socket.recv(1024)
             rev_data = unpack(rev_pkt)
-            if rev_data['type'] == 1 :
+            if rev_data['type'] == PKT_ACCEPT :
                 self.inputID.insert(0,rev_data['id'])
         
-            elif rev_data['type'] == 2 :
+            elif rev_data['type'] == PKT_PLAYER :
                 Ox = rev_data['n']
                 for x in range(Ox):   # tạo ma trận button Ox * Oy
                     for y in range(Ox):
                         self.Buts[x, y] = tk.Button(frame, font=('arial', 15, 'bold'), height=1, width=2,
                                                     borderwidth=2, command=partial(self.handleButton, x=x, y=y))
                         self.Buts[x, y].grid(row=x, column=y)
+                self.textbox.pack()
+                self.textbox.insert(tk.END,f"Hello!")
 
                 location = rev_data['location']
                 m = rev_data['m']
                 x, y = location.getPos()
+                self.textbox.insert(tk.END,f"\nVui long chon vi tri cua tau!")
                 for i in range(0,m):
                     for j in range(0,m):
-                        self.Buts[x+i, y+j].config(height=30, width=30, image=tk.PhotoImage(file="ship.png"))
+                        self.Buts[x+i, y+j].config(bg='blue',command=partial(self.set_pos_ship, x=x+i, y=y+j))
 
 
                 k = rev_data['k']
 
-            
-
+            elif rev_data['type'] == PKT_CHECK_LOCATION :
+                check = rev_data['check']
+                if check == 1:
+                    self.textbox.insert(tk.END,f"\nVi tri hop le")
+                elif check == 2:
+                    self.textbox.insert(tk.END,f"\nVi tri tau khong hop le")
+                elif check == 3 :
+                    self.textbox.insert(tk.END,f"\nVi tri diem sang khong hop le")
+                    
         self.client_socket.close()
 
     def send_data(self, data):
         self.client_socket.send(data)
+
+
+    def set_pos_ship(self, x, y):
+        if self.Buts[x, y]['text'] == "":
+            if not self.memory:
+                self.photo = tk.PhotoImage(file = "ship.png")
+                self.Buts[x, y].config(bg='#f0f0f0',height=30,width=30,image=self.photo)
+                self.memory.append([x,y])
+                self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
+            else:
+                self.photo_tor = tk.PhotoImage(file = "torch.png")
+                self.Buts[x, y].config(bg='#f0f0f0',height=30,width=30,image=self.photo_tor)
+                self.memory.append([x,y])
+                self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
+        pass
 
     def handleButton(self, x, y):
         if self.Buts[x, y]['text'] == "":

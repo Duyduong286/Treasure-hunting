@@ -8,6 +8,7 @@ PKT_HELLO = 0
 PKT_ACCEPT = 1
 PKT_PLAYER = 2
 PKT_LOCATION_SHIP = 3
+PKT_CHECK_LOCATION = 4
 PKT_TREASURE = 5
 PKT_LOCATION_LIGHT = 6
 PKT_TURN = 7
@@ -32,6 +33,8 @@ class Packet:
                 self.id = kwargs["id"]
             if "accept" in list_keys:
                 self.accept = kwargs["accept"]
+            if "check" in list_keys:
+                self.n = kwargs["check"]
             if "n" in list_keys:
                 self.n = kwargs["n"]
             if "k" in list_keys:
@@ -117,7 +120,20 @@ def unpkt_location_ship(mess) -> dict:
         "type" : data[0],
         "len" : data[1],
         "id" : data[2],
-        "coordinates" : Coordinates(data[3], data[4])
+        "location" : Coordinates(data[3], data[4])
+    }
+
+def pkt_check_location(id : int, check : int) -> Packet:
+    header = Header(type=PKT_CHECK_LOCATION, length=8)
+    return Packet(header=header, id=id, check=check)
+
+def unpkt_check_location(mess) -> dict:
+    data = unpacked_little_endian_data(length=16, lit_data=mess)
+    return {
+        "type" : data[0],
+        "len" : data[1],
+        "id" : data[2],
+        "check" : data[3]
     }
 
 def pkt_turn(id : int) -> Packet:
@@ -142,7 +158,7 @@ def unpkt_move(mess) -> dict:
         "type" : data[0],
         "len" : data[1],
         "id" : data[2],
-        "coordinates" : Coordinates(data[3], data[4])
+        "location" : Coordinates(data[3], data[4])
     }
 
 def pkt_shoot(id : int, location : Coordinates) -> Packet:
@@ -155,7 +171,7 @@ def unpkt_shoot(mess) -> dict:
         "type" : data[0],
         "len" : data[1],
         "id" : data[2],
-        "coordinates" : Coordinates(data[3], data[4])
+        "location" : Coordinates(data[3], data[4])
     }
 
 def pkt_check(id : int, accept : bool) -> Packet:
@@ -183,7 +199,7 @@ def unpack(mess):
     elif chk_type == 3:
         return unpkt_location_ship(mess)
     elif chk_type == 4:
-        pass
+        return unpkt_check_location(mess)
     elif chk_type == 5:
         pass
     elif chk_type == 6:
@@ -243,7 +259,12 @@ if __name__ == "__main__":
     # pkt = pkt_accept(1,True,5)
     # print(pkt.sending_data())
     # print(unpack(pkt.sending_data()))
-    pkt = pkt_player(id=1,n=20,m=5,k=2,location=Coordinates(1,2))
+    # pkt = pkt_player(id=1,n=20,m=5,k=2,location=Coordinates(1,2))
+    # print(pkt.sending_data())
+    # print(len(pkt.sending_data()))
+    # print(unpack(pkt.sending_data())['location'].getPos())
+
+    pkt = pkt_check_location(id=1,check=1)
     print(pkt.sending_data())
     print(len(pkt.sending_data()))
-    print(unpack(pkt.sending_data())['location'].getPos())
+    print(unpack(pkt.sending_data()))
