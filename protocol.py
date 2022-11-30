@@ -32,6 +32,8 @@ class Packet:
                 self.id = kwargs["id"]
             if "accept" in list_keys:
                 self.accept = kwargs["accept"]
+            if "n" in list_keys:
+                self.n = kwargs["n"]
             if "k" in list_keys:
                 self.k = kwargs["k"]
             if "m" in list_keys:
@@ -71,35 +73,39 @@ def unpkt_hello(mess) -> Packet:
         "len" : data[1],
     }
 
-def pkt_accept(id : int, accept : bool, m) -> Packet:
+def pkt_accept(id : int, accept : bool) -> Packet:
     acc = 1 if accept else 0
-    header = Header(type=PKT_ACCEPT, length=4)
-    return Packet(header=header, id=id, accept=acc, m=m)
+    header = Header(type=PKT_ACCEPT, length=8)
+    return Packet(header=header, id=id, accept=acc)
 
 def unpkt_accept(mess) -> dict:
-    data = unpacked_little_endian_data(length=20,lit_data=mess)
+    data = unpacked_little_endian_data(length=16,lit_data=mess)
     return {
         "type" : data[0],
         "len" : data[1],
         "id" : data[2],
-        "accept" : data[3],
-        "m" : data[4]
+        "accept" : data[3]
     }
 
-def pkt_player(id : int, m : int, k : int, size : int) -> Packet:
-    if size <= MIN_SIZE :
-        raise Exception(f"Sorry, size below MIN_SIZE: {MIN_SIZE}")
-    
-    if m < 0 :
-        raise Exception(f"Sorry, m below 0")
+def pkt_player(id : int, n : int, m : int, k : int, location : Coordinates) -> Packet:
+    #m vi tri o co the chon
+    #n kich thuoc ban do
+    #k so luong o chon
+    header = Header(type=PKT_PLAYER, length=24)      
 
-    if k < 0 :
-        raise Exception(f"Sorry, k below 0")
+    return Packet(header=header, id=id, n=n, m=m, k=k, location=location)
 
-    header = Header(type=PKT_PLAYER, length=4)
-
-
-    return Packet(header=header, id=id, m=m, k=k)
+def unpkt_player(mess) -> dict:
+    data = unpacked_little_endian_data(length=32, lit_data=mess)
+    return {
+        "type" : data[0],
+        "len" : data[1],
+        "id" : data[2],
+        "n" : data[3],
+        "m" : data[4],
+        "k" : data[5],
+        "location" : Coordinates(data[6], data[7])
+    }
 
 def pkt_location_ship(id : int, location : Coordinates) -> Packet:
     header = Header(type=PKT_LOCATION_SHIP, length=12)
@@ -173,7 +179,7 @@ def unpack(mess):
     elif chk_type == 1:
         return unpkt_accept(mess)
     elif chk_type == 2:
-        pass
+        return unpkt_player(mess)
     elif chk_type == 3:
         return unpkt_location_ship(mess)
     elif chk_type == 4:
@@ -192,11 +198,52 @@ def unpack(mess):
         return unpkt_check(mess)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     # pkt = pkt_check(11,True)
     # print(pkt.sending_data())
     # print(check_type(b'\x00\x00\x00\x00\x00\x00\x00\x00'))
 
-    pkt = pkt_accept(1,True,5)
+    # pkt = pkt_accept(1,True,5)
+    # print(pkt.sending_data())
+    # print(unpack(pkt.sending_data()))
+    pkt = pkt_player(id=1,n=20,m=5,k=2,location=Coordinates(1,2))
     print(pkt.sending_data())
-    print(unpack(pkt.sending_data()))
+    print(len(pkt.sending_data()))
+    print(unpack(pkt.sending_data())['location'].getPos())

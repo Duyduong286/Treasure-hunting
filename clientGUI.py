@@ -73,48 +73,71 @@ class Window(tk.Tk):
         #         self.Buts[x, y].grid(row=x, column=y)
 
     def connectServer(self, host, port, frame):
-        client_socket = socket.socket()  
-        client_socket.connect((host, port))  
+        self.client_socket = socket.socket()  
+        self.client_socket.connect((host, port))  
         self.isRunning = True
-        t2 = threading.Thread(target=self.createThreadClient, args=(client_socket, frame))
+        t2 = threading.Thread(target=self.createThreadClient, args=(frame,))
         t2.start()
 
-    def createThreadClient(self, client_socket, frame):
-        client_socket.send(pkt_hello().sending_data())  
+    def createThreadClient(self, frame):
+        self.client_socket.send(pkt_hello().sending_data())  
         while self.isRunning :
-            rev_pkt = client_socket.recv(1024)
+            rev_pkt = self.client_socket.recv(1024)
             rev_data = unpack(rev_pkt)
             if rev_data['type'] == 1 :
                 self.inputID.insert(0,rev_data['id'])
-                Ox = rev_data['m']
+        
+            elif rev_data['type'] == 2 :
+                Ox = rev_data['n']
                 for x in range(Ox):   # tạo ma trận button Ox * Oy
                     for y in range(Ox):
                         self.Buts[x, y] = tk.Button(frame, font=('arial', 15, 'bold'), height=1, width=2,
                                                     borderwidth=2, command=partial(self.handleButton, x=x, y=y))
                         self.Buts[x, y].grid(row=x, column=y)
-                pass
+
+                location = rev_data['location']
+                m = rev_data['m']
+                x, y = location.getPos()
+                for i in range(0,m):
+                    for j in range(0,m):
+                        self.Buts[x+i, y+j].config(height=30, width=30, image=tk.PhotoImage(file="ship.png"))
+
+
+                k = rev_data['k']
 
             
 
-        client_socket.close()
+        self.client_socket.close()
+
+    def send_data(self, data):
+        self.client_socket.send(data)
 
     def handleButton(self, x, y):
-        if self.Buts[x, y]['text'] == "": #Kiểm tra ô có ký tự rỗng hay không
-            if self.memory.count([x, y]) == 0:
-                self.memory.append([x, y])
-            if len(self.memory) % 2 == 1:
-                self.Buts[x, y]['text'] = 'O'
-                self.Threading_socket.sendData("{}|{}|{}|".format("hit", x, y))
-                if(self.checkWin(x, y, "O")):
-                    self.notification("Winner", "O")
-                    self.newGame()
-            else:
-                print(self.Threading_socket.name)
-                self.Buts[x, y]['text'] = 'X'
-                self.Threading_socket.sendData("{}|{}|{}|".format("hit", x, y))
-                if(self.checkWin(x, y, "X")):
-                    self.notification("Winner", "X")
-                    self.newGame()
+        if self.Buts[x, y]['text'] == "":
+            self.Buts[x, y]['text'] = 'X'
+            self.send_data(pkt_move(123, Coordinates(x,y)).sending_data())
+
+        pass
+
+    # def handleButton(self, x, y):
+    #     if self.Buts[x, y]['text'] == "": #Kiểm tra ô có ký tự rỗng hay không
+    #         if self.memory.count([x, y]) == 0:
+    #             self.memory.append([x, y])
+    #         if len(self.memory) % 2 == 1:
+    #             self.Buts[x, y]['text'] = 'O'
+    #             self.Threading_socket.sendData("{}|{}|{}|".format("hit", x, y))
+    #             if(self.checkWin(x, y, "O")):
+    #                 self.notification("Winner", "O")
+    #                 self.newGame()
+    #         else:
+    #             print(self.Threading_socket.name)
+    #             self.Buts[x, y]['text'] = 'X'
+    #             self.Threading_socket.sendData("{}|{}|{}|".format("hit", x, y))
+    #             if(self.checkWin(x, y, "X")):
+    #                 self.notification("Winner", "X")
+    #                 self.newGame()
+
+        
 
     def notification(self, title, msg):
         messagebox.showinfo(str(title), str(msg))
