@@ -77,8 +77,10 @@ def sending_data(_type : int, user : User):
         user.set_ready(True)
         if game.check_ready():
             textbox.insert(tk.END,f"ca hai da san sang")
-            send_sock(game.get_user_1().sock, pkt_treasure().sending_data())
-            send_sock(game.get_user_2().sock, pkt_treasure().sending_data())
+            x = random.randint(18,19)
+            y = random.randint(8,12)
+            send_sock(game.get_user_1().sock, pkt_treasure(Coordinates(x,y)).sending_data())
+            send_sock(game.get_user_2().sock, pkt_treasure(Coordinates(x,y)).sending_data())
 
 def send_sock(sock, mess):
     # sent = sock.send(mess)

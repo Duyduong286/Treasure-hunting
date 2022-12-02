@@ -144,9 +144,9 @@ def unpkt_check_location(mess) -> dict:
         "check" : data[3]
     }
 
-def pkt_treasure() -> Packet:
+def pkt_treasure(location : Coordinates) -> Packet:
     header = Header(type=PKT_TREASURE, length=8)
-    return Packet(header=header, location=Coordinates(1,0))
+    return Packet(header=header, location=location)
 
 def unpkt_treasure(mess):
     data = unpacked_little_endian_data(length=16, lit_data=mess)

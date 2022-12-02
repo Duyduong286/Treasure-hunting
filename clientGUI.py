@@ -15,7 +15,7 @@ class Window(tk.Tk):
         self.inputID = None
         self.Buts = {}
         self.memory = [0]
-        self.size_mem = [1,1,1]
+        self.size_mem = [1,1,1,1]
         self.photo = tk.PhotoImage(file = "ship.png")
         self.photo_tor = tk.PhotoImage(file = "torch1.png")
         self.photo_neo = tk.PhotoImage(file = "neo.png")
@@ -137,7 +137,7 @@ class Window(tk.Tk):
                         except:
                             pass        
 
-                self.size_mem = [len(self.memory), int(rev_data['k']/2) + 1, int(rev_data['k']/2)]
+                self.size_mem = [len(self.memory), int(rev_data['k']/2) , int(rev_data['k']/2), 1]
 
             elif rev_data['type'] == PKT_CHECK_LOCATION :
                 check = rev_data['check']
@@ -159,14 +159,14 @@ class Window(tk.Tk):
 
 
     def set_pos_ship(self, x, y):
-        if self.Buts[x, y]['text'] == "neo" and self.size_mem[1] > 0:
+        if self.Buts[x, y]['text'] == "neo" and self.size_mem[3] > 0:
             if self.memory[0] == 0:
                 self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
                 self.memory[0] = [x,y]
                 print([x,y])
-                self.size_mem[1] -= 1
+                self.size_mem[3] -= 1
                 # self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
-        elif self.Buts[x, y]['text'] == "light1" and self.size_mem[1] > 1:
+        elif self.Buts[x, y]['text'] == "light1" and self.size_mem[1] > 0:
             if len(self.memory) == 0:    
                 self.memory.append(0)
             self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor,text="torch1")
