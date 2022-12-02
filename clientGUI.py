@@ -162,7 +162,8 @@ class Window(tk.Tk):
                             self.mem_trea.append([posX+i,posY+j]) 
                         except:
                             pass
-                            
+                self.set_playing()
+
         self.client_socket.close()
 
 
