@@ -22,6 +22,7 @@ class Window(tk.Tk):
         self.photo_neo = tk.PhotoImage(file = "neo.png")
         self.photo_fog = tk.PhotoImage(file = "fog.png")
         self.photo_fog_trea = tk.PhotoImage(file = "fog_trea.png")
+        self.photo_sea = tk.PhotoImage(file = "sea.png")
         self.photo_light = tk.PhotoImage(file = "light.png")
         self.Ox = 0
 
@@ -163,6 +164,7 @@ class Window(tk.Tk):
                         except:
                             pass
                 self.set_playing()
+                self.set_light()
 
         self.client_socket.close()
 
@@ -173,6 +175,18 @@ class Window(tk.Tk):
                 self.Buts[x, y].config(command=partial(self.handleButPlaying, x=x, y=y))
                 if [x, y] not in self.memory and [x, y] not in self.mem_trea:
                     self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
+
+    def set_light(self, arr_light):
+        self.light = []
+        for PosX, PosY in arr_light:
+            for i in range(PosX-1, PosX+2):
+                for j in range(PosY-1, PosY+2):
+                    if [i,j] not in arr_light:
+                        try:
+                            self.Buts[i, j].config(height=36,width=28,image=self.photo_sea,text="light")
+                            self.light.append([i,j])
+                        except:
+                            pass
 
     def handleButPlaying(self, x, y):
         PosX = self.memory[0][0]
