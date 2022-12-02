@@ -79,7 +79,7 @@ def sending_data(_type : int, user : User):
             textbox.insert(tk.END,f"Ca hai da san sang")
             send_sock(game.get_user_1(), pkt_treasure(Coordinates(18,8)).sending_data())
             send_sock(game.get_user_2(), pkt_treasure(Coordinates(18,8)).sending_data())
-            game.status == PLAYING
+            game.status = PLAYING
     elif _type == PKT_MOVE and game.status == PLAYING:
         if user == game.get_user_1():
             send_sock(game.get_user_2(),pkt_turn(game.get_user_2().uid).sending_data())
@@ -90,7 +90,7 @@ def send_sock(user, mess):
     # sent = sock.send(mess)
     print("sock",user.sock)
     user.sock.send(mess)
-    textbox.insert(tk.END,f"\nEchoing {mess!r} to {user.id}")
+    textbox.insert(tk.END,f"\nEchoing {mess!r} to {user.uid}")
     pass
 
 
