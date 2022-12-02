@@ -177,8 +177,13 @@ class Window(tk.Tk):
 
             elif rev_data['type'] == PKT_LOCATION_SHIP:
                 x,y = rev_data['location'].getPos()
-                self.enemies[0] = [x, y]
-                self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
+                if [x,y] != [-1,-1]:
+                    self.enemies[0] = [x, y]
+                    self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
+                elif self.enemies[0] != [0]:
+                    [x, y] = self.enemies[0]
+                    self.set_light(self.memory,[])
+                    self.enemies[0] = [0]
 
         self.client_socket.close()
 
@@ -195,7 +200,7 @@ class Window(tk.Tk):
         else:
             self.textbox.insert(tk.END,f"\nDoi den luot!")
 
-    def set_light(self, arr_light, db_light):
+    def set_light(self, arr_light, db_light, *args):
         self.light = []
         for i, j in db_light:
             try:

@@ -83,9 +83,9 @@ class Game:
         PosX, PosY = enemy.get_pos()
         for i in range(PosX-1, PosX+2):
             for j in range(PosY-1, PosY+2):
-                ship_light.append(i,j)
+                ship_light.append([i,j])
         
-        if user.memory[0] in light:
+        if user.memory[0] in light or user.memory[0] in ship_light:
             return user.memory[0]
         return [-1,-1]
 

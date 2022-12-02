@@ -104,11 +104,14 @@ def sending_data(_type : int, user : User):
             other = game.get_user_2()
             send_sock(other,pkt_turn(other.uid).sending_data())
             pos = game.sup_hanlde_collide(user,other.light_tor, other)
-            if pos != [-1, -1]:
                 # send_sock(game.get_user_1(), pkt_location_ship(game.get_user_1().uid,Coordinates(pos[0],pos[1])).sending_data())
-                send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
+            send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
         else:
-            send_sock(game.get_user_1(),pkt_turn(game.get_user_1().uid).sending_data())
+            other = game.get_user_1()
+            send_sock(other,pkt_turn(other.uid).sending_data())
+            pos = game.sup_hanlde_collide(user,other.light_tor, other)
+                # send_sock(game.get_user_1(), pkt_location_ship(game.get_user_1().uid,Coordinates(pos[0],pos[1])).sending_data())
+            send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
 
 def hanlde_collide():
     pass
