@@ -15,11 +15,12 @@ class Window(tk.Tk):
         self.inputID = None
         self.Buts = {}
         self.memory = [0]
-        self.size_mem = [1,1]
+        self.size_mem = [1,1,1]
         self.photo = tk.PhotoImage(file = "ship.png")
         self.photo_tor = tk.PhotoImage(file = "torch1.png")
         self.photo_neo = tk.PhotoImage(file = "neo.png")
         self.photo_fog = tk.PhotoImage(file = "fog.png")
+        self.photo_light = tk.PhotoImage(file = "light.png")
 
     def showFrame(self):
         frame1 = tk.Frame(self)
@@ -129,14 +130,14 @@ class Window(tk.Tk):
                     for j in range(0,int(m)):
                         try:
                             self.Buts[x+i, y+j].config(command=partial(self.set_pos_ship, x=x+i, y=y+j))
-                            self.Buts[x+i, y+j].config(height=36,width=28,image=self.photo_neo,text="neo")
+                            self.Buts[x+i, y+j].config(height=36,width=28,image=self.photo_light,text="light1")
                             self.Buts[x+i+8, y+j].config(command=partial(self.set_pos_ship, x=x+i+8, y=y+j))
-                            self.Buts[x+i+8, y+j].config(height=36,width=28,image=self.photo_neo,text="neo")
+                            self.Buts[x+i+8, y+j].config(height=36,width=28,image=self.photo_light,text="light2")
                             # self.memory.append([x,y])
                         except:
                             pass        
 
-                self.size_mem = [len(self.memory), rev_data['k'] + 1]
+                self.size_mem = [len(self.memory), int(rev_data['k']/2) + 1, int(rev_data['k']/2)]
 
             elif rev_data['type'] == PKT_CHECK_LOCATION :
                 check = rev_data['check']
@@ -165,22 +166,36 @@ class Window(tk.Tk):
                 print([x,y])
                 self.size_mem[1] -= 1
                 # self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
-            else:
-                self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor,text="torch")
-                self.memory.append([x,y])
-                print([x,y])
-                self.size_mem[1] -= 1
-                # self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
+        elif self.Buts[x, y]['text'] == "light1" and self.size_mem[1] > 0:
+            if len(self.memory) == 0:    
+                self.memory.append(0)
+            self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor,text="torch1")
+            self.memory.append([x,y])
+            print([x,y])
+            self.size_mem[1] -= 1
+        elif self.Buts[x, y]['text'] == "light2" and self.size_mem[2] > 0:
+            if len(self.memory) == 0:    
+                self.memory.append(0)
+            self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor,text="torch2")
+            self.memory.append([x,y])
+            print([x,y])
+            self.size_mem[2] -= 1
+            # self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
         elif self.Buts[x, y]['text'] == "ship":
             print("ship")
             self.memory[0] = 0
             self.Buts[x, y].config(height=36,width=28,image=self.photo_neo,text="neo")
             self.size_mem[1] += 1
-        elif self.Buts[x, y]['text'] == "torch":
+        elif self.Buts[x, y]['text'] == "torch1":
             print("torch")
             self.memory.remove([x,y])
-            self.Buts[x, y].config(height=36,width=28,image=self.photo_neo,text="neo")
+            self.Buts[x, y].config(height=36,width=28,image=self.photo_light,text="light1")
             self.size_mem[1] += 1
+        elif self.Buts[x, y]['text'] == "torch2":
+            print("torch")
+            self.memory.remove([x,y])
+            self.Buts[x, y].config(height=36,width=28,image=self.photo_light,text="light2")
+            self.size_mem[2] += 1
 
     def handle_startBT(self):
         self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(self.memory[0][0], self.memory[0][1])).sending_data())
