@@ -211,6 +211,8 @@ class Window(tk.Tk):
 
         self.textbox.insert(tk.END,f"\nMove: ({PosX},{PosY})")
 
+        self.set_light(self.memory)
+
 
     def send_data(self, data):
         self.client_socket.send(data)
