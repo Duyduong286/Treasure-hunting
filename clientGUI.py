@@ -19,6 +19,7 @@ class Window(tk.Tk):
         self.size_mem = [1,1,1,1]
         self.enemies = [0]
         self.photo = tk.PhotoImage(file = "image/ship3.png")
+        self.photo_en = tk.PhotoImage(file = "image/ship.png")
         self.photo_tor = tk.PhotoImage(file = "image/torch2.png")
         self.photo_neo = tk.PhotoImage(file = "image/neo.png")
         self.photo_fog = tk.PhotoImage(file = "image/fog.png")
@@ -179,11 +180,12 @@ class Window(tk.Tk):
                 x,y = rev_data['location'].getPos()
                 if [x,y] != [-1,-1]:
                     self.enemies[0] = [x, y]
-                    self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
-                elif self.enemies[0] != [0]:
+                    self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_en,text="ship")
+                elif self.enemies[0] != 0 and len(self.enemies[0]) == 2:
                     [x, y] = self.enemies[0]
-                    self.set_light(self.memory,[])
                     self.enemies[0] = [0]
+                    self.set_light(self.memory,[])
+
 
         self.client_socket.close()
 

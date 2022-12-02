@@ -102,16 +102,18 @@ def sending_data(_type : int, user : User):
     elif _type == PKT_MOVE and game.status == PLAYING:
         if user == game.get_user_1():
             other = game.get_user_2()
-            send_sock(other,pkt_turn(other.uid).sending_data())
-            pos = game.sup_hanlde_collide(user,other.light_tor, other)
-                # send_sock(game.get_user_1(), pkt_location_ship(game.get_user_1().uid,Coordinates(pos[0],pos[1])).sending_data())
-            send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
         else:
             other = game.get_user_1()
-            send_sock(other,pkt_turn(other.uid).sending_data())
-            pos = game.sup_hanlde_collide(user,other.light_tor, other)
-                # send_sock(game.get_user_1(), pkt_location_ship(game.get_user_1().uid,Coordinates(pos[0],pos[1])).sending_data())
-            send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
+        
+        send_sock(other,pkt_turn(other.uid).sending_data())
+        pos, enemy_pos = game.sup_hanlde_collide(user,other.light_tor, other)
+            # send_sock(game.get_user_1(), pkt_location_ship(game.get_user_1().uid,Coordinates(pos[0],pos[1])).sending_data())
+        send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
+        if enemy_pos[0] != 0 and len(enemy_pos[0]) == 2:
+            send_sock(user, pkt_location_ship(other.uid,Coordinates(enemy_pos[0][0],enemy_pos[0][1])).sending_data())
+        
+        # for enemy in enemy_pos[1:]:
+
 
 def hanlde_collide():
     pass
