@@ -231,6 +231,8 @@ class Window(tk.Tk):
 
         self.set_light(self.memory, db_light)
 
+        self.send_data(pkt_move(id=int(self.inputID.get()), location=Coordinates(PosX,PosY)).sending_data())
+
 
     def send_data(self, data):
         self.client_socket.send(data)
