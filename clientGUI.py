@@ -220,7 +220,7 @@ class Window(tk.Tk):
             for j in range(y-1, y+2):
                 db_light.append([i,j])
         for i in range(PosX-1, PosX+2):
-            for j in range(PosX-1, PosX+2):
+            for j in range(PosY-1, PosY+2):
                 if [i,j] in db_light:
                     db_light.remove([i,j])
 
