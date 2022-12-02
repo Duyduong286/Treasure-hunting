@@ -27,6 +27,9 @@ class User:
     def set_ready(self, is_ready):
         self.is_ready = is_ready
 
+    def get_pos(self):
+        return self.memory[0][0], self.memory[0][1]
+
 class Game:
     def __init__(self):
         self.status = SETUP
@@ -76,11 +79,11 @@ class Game:
     #     user_1, user_2 = self.get_user()
     
     def sup_hanlde_collide(self, user : User, light : list, enemy : User) -> list:
-        ship_light = []
-        for PosX, PosY in enemy.memory[0]:
-            for i in range(PosX-1, PosX+2):
-                for j in range(PosY-1, PosY+2):
-                    ship_light.append(i,j)
+        ship_light = [] 
+        PosX, PosY = enemy.get_pos()
+        for i in range(PosX-1, PosX+2):
+            for j in range(PosY-1, PosY+2):
+                ship_light.append(i,j)
         
         if user.memory[0] in light:
             return user.memory[0]
