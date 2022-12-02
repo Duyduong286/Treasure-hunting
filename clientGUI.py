@@ -171,7 +171,7 @@ class Window(tk.Tk):
                 self.set_light(self.memory,[])
 
             elif rev_data['type'] == PKT_TURN :
-                self.textbox.insert(tk.END,f"\nDen luot cua ban!")
+                self.textbox.insert(tk.END,f"\nDa den luot cua ban!")
                 self.turn = True
 
         self.client_socket.close()
