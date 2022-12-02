@@ -20,6 +20,7 @@ class Window(tk.Tk):
         self.photo_tor = tk.PhotoImage(file = "torch1.png")
         self.photo_neo = tk.PhotoImage(file = "neo.png")
         self.photo_fog = tk.PhotoImage(file = "fog.png")
+        self.photo_fog_trea = tk.PhotoImage(file = "fog_trea.png")
         self.photo_light = tk.PhotoImage(file = "light.png")
 
     def showFrame(self):
@@ -150,8 +151,14 @@ class Window(tk.Tk):
 
             elif rev_data['type'] == PKT_TREASURE :
                 location = rev_data['location']
-                x, y = location.getPos()
-                self.Buts[x, y].config(height=36,width=28,image=self.photo_neo,text="neo")
+                posX, posY = location.getPos()
+                for i in range(0,2):
+                    for j in range(0,5):
+                        try:
+                            self.Buts[posX+i,posY+j].config(command=partial(self.set_pos_ship, x=posX+i, y=posY+j))
+                            self.Buts[posX+i,posY+j].config(height=36,width=28,image=self.photo_neo,text="for_trea") 
+                        except:
+                            pass
         self.client_socket.close()
 
     def send_data(self, data):

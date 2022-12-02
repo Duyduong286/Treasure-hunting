@@ -1,4 +1,5 @@
 import random
+from coordinates import Coordinates
 
 SETUP = 1
 PLAYING = 2
@@ -21,6 +22,9 @@ class Game:
     def __init__(self):
         self.status = SETUP
         self.users = [None, None]
+        Posx = random.randint(18,19)
+        Posy = random.randint(8,12)
+        self.pos_treasure = Coordinates(Posx,Posy)
 
     def set_user(self, ip):
         id = 1000+random.randint(10,100)
@@ -58,3 +62,4 @@ class Game:
         if user_1 and user_2 :
             return True
         return False
+
