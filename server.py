@@ -62,7 +62,8 @@ def collect_data(dict_data : list, user : User):
     elif dict_data['type'] == PKT_LOCATION_LIGHT:
         if len(user.memory) == 0:
             user.memory.append([0,0])
-        user.memory[1:] = dict_data['listloc']
+            for coor in dict_data['listloc']:
+                user.memory.append(coor.getArrPos())
         textbox.insert(tk.END,f"\nUID: {user.uid}, MEM: {user.memory}")
 
 def close_connect(key):
