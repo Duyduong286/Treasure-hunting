@@ -81,7 +81,10 @@ def sending_data(_type : int, user : User):
             send_sock(game.get_user_2().sock, pkt_treasure(Coordinates(18,8)).sending_data())
             game.status == PLAYING
     elif _type == PKT_MOVE and game.status == PLAYING:
-        yield pkt_turn(id=uid).sending_data()
+        if user == game.get_user_1():
+            send_sock(game.get_user_2().sock,pkt_turn(game.get_user_2().uid).sending_data())
+        else:
+            send_sock(game.get_user_1().sock,pkt_turn(game.get_user_1().uid).sending_data())
 
 def send_sock(sock, mess):
     # sent = sock.send(mess)

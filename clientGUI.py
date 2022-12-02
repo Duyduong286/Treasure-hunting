@@ -118,10 +118,13 @@ class Window(tk.Tk):
                 x, y = location.getPos()
                 self.textbox.insert(tk.END,f"\nVui long chon vi tri cua tau!")
                 
-                if rev_data['id'] - 2000 < 0 :
+                self.uid = rev_data['id']
+                if self.uid - 2000 < 0 :
                     posX, posY = 0,0
+                    self.turn = True
                 else:
                     posX, posY = 0,self.Ox-5
+                    self.turn = False
 
                 for i in range(0,int(2)):
                     for j in range(0,int(5)):
@@ -180,6 +183,11 @@ class Window(tk.Tk):
                 self.Buts[x, y].config(command=partial(self.handleButPlaying, x=x, y=y))
                 if [x, y] not in self.memory and [x, y] not in self.mem_trea:
                     self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
+
+        if self.turn:
+            self.textbox.insert(tk.END,f"\nDen luot cua ban!")
+        else:
+            self.textbox.insert(tk.END,f"\nDoi den luot!")
 
     def set_light(self, arr_light, db_light):
         self.light = []
