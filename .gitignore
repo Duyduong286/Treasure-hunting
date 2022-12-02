@@ -4,3 +4,4 @@ protocol
 __pycache__
 ss.py
 threading_sk.py
+.idea
