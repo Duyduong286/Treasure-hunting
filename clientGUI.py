@@ -221,7 +221,7 @@ class Window(tk.Tk):
             print("ship")
             self.memory[0] = 0
             self.Buts[x, y].config(height=36,width=28,image=self.photo_neo,text="neo")
-            self.size_mem[1] += 1
+            self.size_mem[3] += 1
         elif self.Buts[x, y]['text'] == "torch1":
             print("torch")
             self.memory.remove([x,y])
