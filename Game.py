@@ -75,8 +75,14 @@ class Game:
     # def hanlde_collide():
     #     user_1, user_2 = self.get_user()
     
-    def sup_hanlde_collide(self, user : User, mem : list) -> list:
-        if user.memory[0] in mem:
+    def sup_hanlde_collide(self, user : User, light : list, enemy : User) -> list:
+        ship_light = []
+        for PosX, PosY in enemy.memory[0]:
+            for i in range(PosX-1, PosX+2):
+                for j in range(PosY-1, PosY+2):
+                    ship_light.append(i,j)
+        
+        if user.memory[0] in light:
             return user.memory[0]
         return [-1,-1]
 

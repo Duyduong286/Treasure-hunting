@@ -17,6 +17,7 @@ class Window(tk.Tk):
         self.memory = [0]
         self.mem_trea = []
         self.size_mem = [1,1,1,1]
+        self.enemies = [0]
         self.photo = tk.PhotoImage(file = "image/ship3.png")
         self.photo_tor = tk.PhotoImage(file = "image/torch2.png")
         self.photo_neo = tk.PhotoImage(file = "image/neo.png")
@@ -176,6 +177,7 @@ class Window(tk.Tk):
 
             elif rev_data['type'] == PKT_LOCATION_SHIP:
                 x,y = rev_data['location'].getPos()
+                self.enemies[0] = [x, y]
                 self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
 
         self.client_socket.close()
@@ -207,7 +209,7 @@ class Window(tk.Tk):
         for PosX, PosY in arr_light:
             for i in range(PosX-1, PosX+2):
                 for j in range(PosY-1, PosY+2):
-                    if [i,j] not in arr_light:
+                    if [i,j] not in arr_light and [i,j] not in self.enemies:
                         try:
                             self.Buts[i, j].config(height=36,width=28,image=self.photo_sea,text="light")
                             self.light.append([i,j])
