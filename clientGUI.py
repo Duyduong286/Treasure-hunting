@@ -4,7 +4,6 @@ import threading
 import socket
 from tkinter import messagebox
 import time
-from threading_sk import Threading_socket
 from protocol import *
 
 
@@ -15,9 +14,12 @@ class Window(tk.Tk):
         self.isRunning = False
         self.inputID = None
         self.Buts = {}
-        self.memory = []
-        self.Threading_socket = Threading_socket(self)
-        print(self.Threading_socket.name)
+        self.memory = [0]
+        self.size_mem = [1,1]
+        self.photo = tk.PhotoImage(file = "ship.png")
+        self.photo_tor = tk.PhotoImage(file = "torch1.png")
+        self.photo_neo = tk.PhotoImage(file = "neo.png")
+        self.photo_fog = tk.PhotoImage(file = "fog.png")
 
     def showFrame(self):
         frame1 = tk.Frame(self)
@@ -62,6 +64,9 @@ class Window(tk.Tk):
                               command=partial(self.connectServer,"127.0.0.1",3456, frame2))
         connectBT.grid(row=0, column=6, padx=3)
 
+        self.startBT = tk.Button(frame1, text="Start", width=10,
+                              command=partial(self.handle_startBT))
+
         # makeHostBT = tk.Button(frame1, text="MakeHost", width=10,  # nút tạo host
         #                        command=lambda: self.Threading_socket.serverAction())
         # makeHostBT.grid(row=0, column=4, padx=30)
@@ -82,30 +87,56 @@ class Window(tk.Tk):
         self.client_socket.send(pkt_hello().sending_data())  
         while self.isRunning :
             rev_pkt = self.client_socket.recv(1024)
+            
             rev_data = unpack(rev_pkt)
-            if rev_data['type'] == PKT_ACCEPT :
-                self.inputID.insert(0,rev_data['id'])
         
+            if rev_data['type'] == PKT_ACCEPT :
+                if rev_data['accept']:
+                    self.inputID.insert(0,rev_data['id'])
+                else:
+                    print("Khong duoc chap nhan ket noi")
             elif rev_data['type'] == PKT_PLAYER :
                 Ox = rev_data['n']
                 for x in range(Ox):   # tạo ma trận button Ox * Oy
                     for y in range(Ox):
                         self.Buts[x, y] = tk.Button(frame, font=('arial', 15, 'bold'), height=1, width=2,
                                                     borderwidth=2, command=partial(self.handleButton, x=x, y=y))
+                        self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
                         self.Buts[x, y].grid(row=x, column=y)
                 self.textbox.pack()
                 self.textbox.insert(tk.END,f"Hello!")
+                self.startBT.grid(row=0, column=7, padx=3)
 
                 location = rev_data['location']
                 m = rev_data['m']
                 x, y = location.getPos()
                 self.textbox.insert(tk.END,f"\nVui long chon vi tri cua tau!")
-                for i in range(0,m):
-                    for j in range(0,m):
-                        self.Buts[x+i, y+j].config(bg='blue',command=partial(self.set_pos_ship, x=x+i, y=y+j))
+                
+                if rev_data['id'] - 2000 < 0 :
+                    posX, posY = 0,0
+                else:
+                    posX, posY = 0,Ox-5
 
+                for i in range(0,int(2)):
+                    for j in range(0,int(5)):
+                        try:
+                            self.Buts[posX+i,posY+j].config(command=partial(self.set_pos_ship, x=posX+i, y=posY+j))
+                            self.Buts[posX+i,posY+j].config(height=36,width=28,image=self.photo_neo,text="neo") 
+                        except:
+                            pass
 
-                k = rev_data['k']
+                for i in range(0,int(m/6)):
+                    for j in range(0,int(m)):
+                        try:
+                            self.Buts[x+i, y+j].config(command=partial(self.set_pos_ship, x=x+i, y=y+j))
+                            self.Buts[x+i, y+j].config(height=36,width=28,image=self.photo_neo,text="neo")
+                            self.Buts[x+i+8, y+j].config(command=partial(self.set_pos_ship, x=x+i+8, y=y+j))
+                            self.Buts[x+i+8, y+j].config(height=36,width=28,image=self.photo_neo,text="neo")
+                            # self.memory.append([x,y])
+                        except:
+                            pass        
+
+                self.size_mem = [len(self.memory), rev_data['k'] + 1]
 
             elif rev_data['type'] == PKT_CHECK_LOCATION :
                 check = rev_data['check']
@@ -115,7 +146,11 @@ class Window(tk.Tk):
                     self.textbox.insert(tk.END,f"\nVi tri tau khong hop le")
                 elif check == 3 :
                     self.textbox.insert(tk.END,f"\nVi tri diem sang khong hop le")
-                    
+
+            elif rev_data['type'] == PKT_TREASURE :
+                location = rev_data['location']
+                x, y = location.getPos()
+                self.Buts[x, y].config(height=36,width=28,image=self.photo_neo,text="neo")
         self.client_socket.close()
 
     def send_data(self, data):
@@ -123,24 +158,43 @@ class Window(tk.Tk):
 
 
     def set_pos_ship(self, x, y):
-        if self.Buts[x, y]['text'] == "":
-            if not self.memory:
-                self.photo = tk.PhotoImage(file = "ship.png")
-                self.Buts[x, y].config(bg='#f0f0f0',height=30,width=30,image=self.photo)
-                self.memory.append([x,y])
-                self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
+        if self.Buts[x, y]['text'] == "neo" and self.size_mem[1] > 0:
+            if self.memory[0] == 0:
+                self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
+                self.memory[0] = [x,y]
+                print([x,y])
+                self.size_mem[1] -= 1
+                # self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
             else:
-                self.photo_tor = tk.PhotoImage(file = "torch.png")
-                self.Buts[x, y].config(bg='#f0f0f0',height=30,width=30,image=self.photo_tor)
+                self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor,text="torch")
                 self.memory.append([x,y])
-                self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
-        pass
+                print([x,y])
+                self.size_mem[1] -= 1
+                # self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
+        elif self.Buts[x, y]['text'] == "ship":
+            print("ship")
+            self.memory[0] = 0
+            self.Buts[x, y].config(height=36,width=28,image=self.photo_neo,text="neo")
+            self.size_mem[1] += 1
+        elif self.Buts[x, y]['text'] == "torch":
+            print("torch")
+            self.memory.remove([x,y])
+            self.Buts[x, y].config(height=36,width=28,image=self.photo_neo,text="neo")
+            self.size_mem[1] += 1
 
+    def handle_startBT(self):
+        self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(self.memory[0][0], self.memory[0][1])).sending_data())
+
+        listloc=[]
+        for pos in self.memory[1:]:
+            listloc.append(Coordinates(pos[0], pos[1]))
+
+        self.send_data(pkt_location_light(id=int(self.inputID.get()),listloc=listloc).sending_data())    
+    
+    
     def handleButton(self, x, y):
-        if self.Buts[x, y]['text'] == "":
-            self.Buts[x, y]['text'] = 'X'
-            self.send_data(pkt_move(123, Coordinates(x,y)).sending_data())
-
+        if self.Buts[x, y]['text'] == "fog":
+            self.send_data(pkt_move(id=int(self.inputID.get()), location=Coordinates(x,y)).sending_data())
         pass
 
     # def handleButton(self, x, y):

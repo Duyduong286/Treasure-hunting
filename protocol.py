@@ -37,12 +37,14 @@ class Packet:
                 self.n = kwargs["check"]
             if "n" in list_keys:
                 self.n = kwargs["n"]
-            if "k" in list_keys:
-                self.k = kwargs["k"]
             if "m" in list_keys:
                 self.m = kwargs["m"]
+            if "k" in list_keys:
+                self.k = kwargs["k"]
             if "location" in list_keys:
                 self.location = kwargs["location"]
+            if "listloc" in list_keys:
+                self.location = kwargs["listloc"]
     
     def sending_data(self):
         return packed_little_endian_data(self.header.type, self.header.length, self.__dict__.values())
@@ -55,7 +57,13 @@ def packed_little_endian_data(_type : int, length : int, dict_data : dict):
         if type(item) == Coordinates:
             data += struct.pack('i', item.x)
             data += struct.pack('i', item.y)
-
+        if type(item) == list:
+            for i in item:
+                if type(i) == int:
+                    data += struct.pack('i', i)
+                if type(i) == Coordinates:
+                        data += struct.pack('i', i.x)
+                        data += struct.pack('i', i.y)
     return data
 
 def unpacked_little_endian_data(length : int, lit_data):
@@ -136,6 +144,37 @@ def unpkt_check_location(mess) -> dict:
         "check" : data[3]
     }
 
+def pkt_treasure() -> Packet:
+    header = Header(type=PKT_TREASURE, length=8)
+    return Packet(header=header, location=Coordinates(1,0))
+
+def unpkt_treasure(mess):
+    data = unpacked_little_endian_data(length=16, lit_data=mess)
+    return {
+        "type" : data[0],
+        "len" : data[1],
+        "location" : Coordinates(data[2],data[3])
+    }
+
+def pkt_location_light(id : int, listloc : list) -> Packet:
+    k=len(listloc)
+    header = Header(type=PKT_LOCATION_LIGHT, length=4*k*2)
+    return Packet(header=header, id=id, listloc=listloc) 
+
+def unpkt_location_light(mess) -> dict:
+    data = unpacked_little_endian_data(length=len(mess), lit_data=mess)
+    k = (len(mess)-12)/8
+    listloc = []
+    for i in range(0,int(k)+2,2):
+        listloc.append(Coordinates(data[3+i],data[4+i]))
+
+    return {
+        "type" : data[0],
+        "len" : data[1],
+        "id" : data[2],
+        "listloc" : listloc
+    }
+
 def pkt_turn(id : int) -> Packet:
     header = Header(type=PKT_TURN, length=4)
     return Packet(header=header, id=id)
@@ -201,9 +240,9 @@ def unpack(mess):
     elif chk_type == 4:
         return unpkt_check_location(mess)
     elif chk_type == 5:
-        pass
+        return unpkt_treasure(mess)
     elif chk_type == 6:
-        pass
+        return unpkt_location_light(mess)
     elif chk_type == 7:
         return unpkt_turn(mess)
     elif chk_type == 8:
@@ -264,7 +303,18 @@ if __name__ == "__main__":
     # print(len(pkt.sending_data()))
     # print(unpack(pkt.sending_data())['location'].getPos())
 
-    pkt = pkt_check_location(id=1,check=1)
+    # tor1 = Coordinates(1,1)
+    # tor2 = Coordinates(1,3)
+    # tor3 = Coordinates(5,4)
+
+    # listtor = [tor1, tor2, tor3]
+
+    # pkt = pkt_location_light(id=1111,listloc=listtor)
+    # print(pkt.sending_data())
+    # print(unpack(mess=pkt.sending_data()))
+    # for i in unpack(mess=pkt.sending_data())['listloc']:
+    #     print(i.getPos())
+
+    pkt = pkt_treasure()
     print(pkt.sending_data())
-    print(len(pkt.sending_data()))
-    print(unpack(pkt.sending_data()))
+    print(unpack(pkt.sending_data())['location'].getPos())
