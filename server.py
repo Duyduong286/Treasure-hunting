@@ -109,10 +109,10 @@ def sending_data(_type : int, user : User):
         pos, enemy_pos = game.sup_hanlde_collide(user,other.light_tor, other)
             # send_sock(game.get_user_1(), pkt_location_ship(game.get_user_1().uid,Coordinates(pos[0],pos[1])).sending_data())
         send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
-        if enemy_pos[0] != 0 and len(enemy_pos[0]) == 2:
-            send_sock(user, pkt_location_ship(other.uid,Coordinates(enemy_pos[0][0],enemy_pos[0][1])).sending_data())
+        send_sock(user, pkt_location_ship(user.uid,Coordinates(enemy_pos[0][0],enemy_pos[0][1])).sending_data())
         
-        # for enemy in enemy_pos[1:]:
+        if len(enemy_pos[1:]) > 0:
+            send_sock(user, pkt_location_light(user.uid, enemy_pos[1:]).sending_data())
 
 
 def hanlde_collide():

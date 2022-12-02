@@ -88,9 +88,9 @@ class Game:
         if user.memory[0] in light or user.memory[0] in ship_light:
             pos = user.memory[0]
         else:
-            return [-1,-1], [0]
+            return [-1,-1], [[-1,-1]]
         
-        enemy_pos = [0]
+        enemy_pos = [[-1,-1]]
         PosX, PosY = user.memory[0]
         for i in range(PosX-1, PosX+2):
             for j in range(PosY-1, PosY+2):

@@ -165,9 +165,11 @@ def unpkt_location_light(mess) -> dict:
     data = unpacked_little_endian_data(length=len(mess), lit_data=mess)
     k = (len(mess)-12)/8
     listloc = []
-    for i in range(0,int(k)+2,2):
-        listloc.append(Coordinates(data[3+i],data[4+i]))
-
+    try:
+        for i in range(0,int(k)+2,2):
+            listloc.append(Coordinates(data[3+i],data[4+i]))
+    except:
+        pass
     return {
         "type" : data[0],
         "len" : data[1],

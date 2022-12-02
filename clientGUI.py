@@ -20,6 +20,7 @@ class Window(tk.Tk):
         self.enemies = [0]
         self.photo = tk.PhotoImage(file = "image/ship3.png")
         self.photo_en = tk.PhotoImage(file = "image/ship.png")
+        self.photo_tor_en = tk.PhotoImage(file = "image/torch1.png")
         self.photo_tor = tk.PhotoImage(file = "image/torch2.png")
         self.photo_neo = tk.PhotoImage(file = "image/neo.png")
         self.photo_fog = tk.PhotoImage(file = "image/fog.png")
@@ -182,12 +183,20 @@ class Window(tk.Tk):
                     self.enemies[0] = 0
                     self.set_light(self.memory,[])
                     self.enemies[0] = [x, y]
-                    self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_en,text="ship")
+                    self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_en,text="ship_en")
                 elif self.enemies[0] != 0 and len(self.enemies[0]) == 2:
                     [x, y] = self.enemies[0]
                     self.enemies[0] = 0
                     self.set_light(self.memory,[])
 
+            elif rev_data['type'] == PKT_LOCATION_LIGHT:
+                pass
+                # if len(self.enemies) == 0:
+                #     self.enemies[0] = 0
+                # for coor in rev_data['listloc']:
+                #     self.enemies.append(coor.getArrPos())
+                #     [x, y] = coor
+                #     self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor,text="torch_en")
 
         self.client_socket.close()
 
