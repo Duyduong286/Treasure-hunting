@@ -18,7 +18,8 @@ class User:
         for PosX, PosY in self.memory[1:]:
             for i in range(PosX-1, PosX+2):
                 for j in range(PosY-1, PosY+2):
-                    self.light_tor.append([i, j])
+                    if [i, j] not in self.light_tor:
+                        self.light_tor.append([i, j])
 
     def set_sock(self, sock):
         self.sock = sock

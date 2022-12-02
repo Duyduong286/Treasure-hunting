@@ -66,6 +66,9 @@ def collect_data(dict_data : list, user : User):
             user.memory.append(coor.getArrPos())
         user.set_light_tor()
         textbox.insert(tk.END,f"\nUID: {user.uid}, MEM: {user.memory}, LIGHT: {user.light_tor}")
+    elif dict_data['type'] == PKT_MOVE:
+        user.memory[0] = dict_data['location'].getArrPos()
+        textbox.insert(tk.END,f"\nUID: {user.uid}, MEM: {user.memory}")
 
 def close_connect(key):
     sock = key.fileobj
