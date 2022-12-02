@@ -58,10 +58,12 @@ def service_connection(key, mask):
 def collect_data(dict_data : list, user : User):
     if dict_data['type'] == PKT_LOCATION_SHIP:
         user.memory[0] = dict_data['location'].getArrPos()
+        textbox.insert(tk.END,f"\nUID: {user.uid}, MEM: {user.memory}")
     elif dict_data['type'] == PKT_LOCATION_LIGHT:
         if len(user.memory) == 0:
             user.memory.append([0,0])
         user.memory[1:] = dict_data['listloc']
+        textbox.insert(tk.END,f"\nUID: {user.uid}, MEM: {user.memory}")
 
 def close_connect(key):
     sock = key.fileobj

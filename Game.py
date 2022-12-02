@@ -74,7 +74,7 @@ class Game:
     # def hanlde_collide():
     #     user_1, user_2 = self.get_user()
     
-    def sup_hanlde_collide(user : User, mem : list) -> list:
+    def sup_hanlde_collide(self, user : User, mem : list) -> list:
         if user.memory[0] in mem:
             return user.memory[0]
         return [-1,-1]
