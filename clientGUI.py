@@ -15,6 +15,7 @@ class Window(tk.Tk):
         self.inputID = None
         self.Buts = {}
         self.memory = [0]
+        self.mem_trea = []
         self.size_mem = [1,1,1,1]
         self.photo = tk.PhotoImage(file = "ship.png")
         self.photo_tor = tk.PhotoImage(file = "torch1.png")
@@ -22,6 +23,7 @@ class Window(tk.Tk):
         self.photo_fog = tk.PhotoImage(file = "fog.png")
         self.photo_fog_trea = tk.PhotoImage(file = "fog_trea.png")
         self.photo_light = tk.PhotoImage(file = "light.png")
+        self.Ox = 0
 
     def showFrame(self):
         frame1 = tk.Frame(self)
@@ -98,9 +100,9 @@ class Window(tk.Tk):
                 else:
                     print("Khong duoc chap nhan ket noi")
             elif rev_data['type'] == PKT_PLAYER :
-                Ox = rev_data['n']
-                for x in range(Ox):   # tạo ma trận button Ox * Oy
-                    for y in range(Ox):
+                self.Ox = rev_data['n']
+                for x in range(self.Ox):   # tạo ma trận button Ox * Oy
+                    for y in range(self.Ox):
                         self.Buts[x, y] = tk.Button(frame, font=('arial', 15, 'bold'), height=1, width=2,
                                                     borderwidth=2, command=partial(self.handleButton, x=x, y=y))
                         self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
@@ -117,7 +119,7 @@ class Window(tk.Tk):
                 if rev_data['id'] - 2000 < 0 :
                     posX, posY = 0,0
                 else:
-                    posX, posY = 0,Ox-5
+                    posX, posY = 0,self.Ox-5
 
                 for i in range(0,int(2)):
                     for j in range(0,int(5)):
@@ -156,10 +158,37 @@ class Window(tk.Tk):
                     for j in range(0,5):
                         try:
                             self.Buts[posX+i,posY+j].config(command=partial(self.set_pos_ship, x=posX+i, y=posY+j))
-                            self.Buts[posX+i,posY+j].config(height=36,width=28,image=self.photo_fog_trea,text="fog_trea") 
+                            self.Buts[posX+i,posY+j].config(height=36,width=28,image=self.photo_fog_trea,text="fog_trea")
+                            self.mem_trea.append([posX+i,posY+j]) 
                         except:
                             pass
+                            
         self.client_socket.close()
+
+
+    def set_playing(self):
+        for x in range(self.Ox):   # tạo ma trận button Ox * Oy
+            for y in range(self.Ox):
+                self.Buts[x, y].config(command=partial(self.handleButPlaying, x=x, y=y))
+                if [x, y] not in self.memory or [x, y] not in self.mem_trea:
+                    self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
+
+    def handleButPlaying(self, x, y):
+        PosX = self.memory[0][0]
+        PosY = self.memory[0][1]
+
+        if True:
+            self.move(x,y)
+
+    def move(self, PosX, PosY):
+        x = self.memory[0][0]
+        y = self.memory[0][1]
+        self.Buts[x, y].config(command=partial(self.handleButPlaying, x=x, y=y))
+        self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
+
+        self.memory[0] = [PosX, PosY]
+        self.Buts[PosX, PosY].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
+
 
     def send_data(self, data):
         self.client_socket.send(data)
@@ -258,10 +287,10 @@ class Window(tk.Tk):
         else:
             print("No character")
 
-    def newGame(self):
-        for x in range(Ox):
-            for y in range(Oy):
-                self.Buts[x, y]["text"] = ""
+    # def newGame(self):
+    #     for x in range(Ox):
+    #         for y in range(Oy):
+    #             self.Buts[x, y]["text"] = ""
 
 
 if __name__ == "__main__":
