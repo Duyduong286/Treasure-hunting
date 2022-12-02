@@ -171,14 +171,19 @@ class Window(tk.Tk):
         for x in range(self.Ox):   # tạo ma trận button Ox * Oy
             for y in range(self.Ox):
                 self.Buts[x, y].config(command=partial(self.handleButPlaying, x=x, y=y))
-                if [x, y] not in self.memory or [x, y] not in self.mem_trea:
+                if [x, y] not in self.memory and [x, y] not in self.mem_trea:
                     self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
 
     def handleButPlaying(self, x, y):
         PosX = self.memory[0][0]
         PosY = self.memory[0][1]
 
-        if True:
+        valid = []
+        for i in range(PosX-1, PosX+2):
+            for j in range(PosY-1, PosY+2):
+                valid.append([i,j])
+
+        if [x,y] in valid and [x,y] != [PosX,PosY]:
             self.move(x,y)
 
     def move(self, PosX, PosY):
@@ -189,6 +194,8 @@ class Window(tk.Tk):
 
         self.memory[0] = [PosX, PosY]
         self.Buts[PosX, PosY].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
+
+        self.textbox.insert(tk.END,f"\nMove: ({PosX},{PosY})")
 
 
     def send_data(self, data):
