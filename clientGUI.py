@@ -164,7 +164,7 @@ class Window(tk.Tk):
                         except:
                             pass
                 self.set_playing()
-                self.set_light(self.memory)
+                self.set_light(self.memory,[])
 
         self.client_socket.close()
 
@@ -176,8 +176,16 @@ class Window(tk.Tk):
                 if [x, y] not in self.memory and [x, y] not in self.mem_trea:
                     self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
 
-    def set_light(self, arr_light):
+    def set_light(self, arr_light, db_light):
         self.light = []
+        for i, j in db_light:
+            try:
+                self.Buts[i, j].config(height=36,width=28,image=self.photo_fog,text="fog")
+                if [i,j] in self.light:
+                    self.light.remove([i,j])
+            except:
+                pass
+
         for PosX, PosY in arr_light:
             for i in range(PosX-1, PosX+2):
                 for j in range(PosY-1, PosY+2):
@@ -206,12 +214,21 @@ class Window(tk.Tk):
         self.Buts[x, y].config(command=partial(self.handleButPlaying, x=x, y=y))
         self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
 
+        db_light = []
+        for i in range(x-1, x+2):
+            for j in range(y-1, y+2):
+                db_light.append([i,j])
+        for i in range(PosX-1, PosX+2):
+            for j in range(PosX-1, PosX+2):
+                if [i,j] in db_light:
+                    db_light.remove([i,j])
+
         self.memory[0] = [PosX, PosY]
         self.Buts[PosX, PosY].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
 
         self.textbox.insert(tk.END,f"\nMove: ({PosX},{PosY})")
 
-        self.set_light(self.memory)
+        self.set_light(self.memory, db_light)
 
 
     def send_data(self, data):
