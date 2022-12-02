@@ -64,7 +64,8 @@ def collect_data(dict_data : list, user : User):
             user.memory.append([0,0])
         for coor in dict_data['listloc']:
             user.memory.append(coor.getArrPos())
-        textbox.insert(tk.END,f"\nUID: {user.uid}, MEM: {user.memory}")
+        user.set_light_tor()
+        textbox.insert(tk.END,f"\nUID: {user.uid}, MEM: {user.memory}, LIGHT: {user.light_tor}")
 
 def close_connect(key):
     sock = key.fileobj
@@ -91,8 +92,6 @@ def sending_data(_type : int, user : User):
         user.set_ready(True)
         if game.check_ready():
             textbox.insert(tk.END,f"Ca hai da san sang")
-            game.get_user_1.set_light_tor()
-            game.get_user_2.set_light_tor()
             send_sock(game.get_user_1(), pkt_treasure(Coordinates(18,8)).sending_data())
             send_sock(game.get_user_2(), pkt_treasure(Coordinates(18,8)).sending_data())
             game.status = PLAYING
