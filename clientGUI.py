@@ -179,11 +179,13 @@ class Window(tk.Tk):
             elif rev_data['type'] == PKT_LOCATION_SHIP:
                 x,y = rev_data['location'].getPos()
                 if [x,y] != [-1,-1]:
+                    self.enemies[0] = 0
+                    self.set_light(self.memory,[])
                     self.enemies[0] = [x, y]
                     self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_en,text="ship")
                 elif self.enemies[0] != 0 and len(self.enemies[0]) == 2:
                     [x, y] = self.enemies[0]
-                    self.enemies[0] = [0]
+                    self.enemies[0] = 0
                     self.set_light(self.memory,[])
 
 
