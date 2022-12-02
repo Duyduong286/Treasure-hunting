@@ -156,7 +156,7 @@ class Window(tk.Tk):
                     for j in range(0,5):
                         try:
                             self.Buts[posX+i,posY+j].config(command=partial(self.set_pos_ship, x=posX+i, y=posY+j))
-                            self.Buts[posX+i,posY+j].config(height=36,width=28,image=self.photo_neo,text="for_trea") 
+                            self.Buts[posX+i,posY+j].config(height=36,width=28,image=self.photo_fog_trea,text="fog_trea") 
                         except:
                             pass
         self.client_socket.close()

@@ -80,6 +80,7 @@ def sending_data(_type : int, user : User):
             send_sock(game.get_user_1().sock, pkt_treasure(Coordinates(18,8)).sending_data())
             send_sock(game.get_user_2().sock, pkt_treasure(Coordinates(18,8)).sending_data())
 
+
 def send_sock(sock, mess):
     # sent = sock.send(mess)
     print("sock",sock)
