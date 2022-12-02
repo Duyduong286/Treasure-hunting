@@ -17,13 +17,13 @@ class Window(tk.Tk):
         self.memory = [0]
         self.mem_trea = []
         self.size_mem = [1,1,1,1]
-        self.photo = tk.PhotoImage(file = "ship.png")
-        self.photo_tor = tk.PhotoImage(file = "torch1.png")
-        self.photo_neo = tk.PhotoImage(file = "neo.png")
-        self.photo_fog = tk.PhotoImage(file = "fog.png")
-        self.photo_fog_trea = tk.PhotoImage(file = "fog_trea.png")
-        self.photo_sea = tk.PhotoImage(file = "sea.png")
-        self.photo_light = tk.PhotoImage(file = "light.png")
+        self.photo = tk.PhotoImage(file = "image/ship3.png")
+        self.photo_tor = tk.PhotoImage(file = "image/torch2.png")
+        self.photo_neo = tk.PhotoImage(file = "image/neo.png")
+        self.photo_fog = tk.PhotoImage(file = "image/fog.png")
+        self.photo_fog_trea = tk.PhotoImage(file = "image/fog_trea.png")
+        self.photo_sea = tk.PhotoImage(file = "image/sea.png")
+        self.photo_light = tk.PhotoImage(file = "image/light.png")
         self.Ox = 0
         self.turn = False
 
