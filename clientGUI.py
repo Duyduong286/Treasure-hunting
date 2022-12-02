@@ -164,7 +164,7 @@ class Window(tk.Tk):
                         except:
                             pass
                 self.set_playing()
-                self.set_light()
+                self.set_light(self.memory)
 
         self.client_socket.close()
 
