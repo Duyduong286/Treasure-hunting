@@ -183,7 +183,7 @@ class Window(tk.Tk):
             for j in range(PosY-1, PosY+2):
                 valid.append([i,j])
 
-        if [x,y] in valid and [x,y] != [PosX,PosY]:
+        if [x,y] in valid and [x,y] not in self.memory:
             self.move(x,y)
 
     def move(self, PosX, PosY):
