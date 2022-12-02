@@ -180,9 +180,10 @@ class Window(tk.Tk):
         self.light = []
         for i, j in db_light:
             try:
-                self.Buts[i, j].config(height=36,width=28,image=self.photo_fog,text="fog")
-                if [i,j] in self.light:
-                    self.light.remove([i,j])
+                if [i,j] not in self.memory:
+                    self.Buts[i, j].config(height=36,width=28,image=self.photo_fog,text="fog")
+                    if [i,j] in self.light:
+                        self.light.remove([i,j])
             except:
                 pass
 
