@@ -25,6 +25,7 @@ class Window(tk.Tk):
         self.photo_sea = tk.PhotoImage(file = "sea.png")
         self.photo_light = tk.PhotoImage(file = "light.png")
         self.Ox = 0
+        self.turn = False
 
     def showFrame(self):
         frame1 = tk.Frame(self)
@@ -166,6 +167,10 @@ class Window(tk.Tk):
                 self.set_playing()
                 self.set_light(self.memory,[])
 
+            elif rev_data['type'] == PKT_TURN :
+                self.textbox.insert(tk.END,f"\nDen luot cua ban!")
+                self.turn = True
+
         self.client_socket.close()
 
 
@@ -198,18 +203,22 @@ class Window(tk.Tk):
                             pass
 
     def handleButPlaying(self, x, y):
-        PosX = self.memory[0][0]
-        PosY = self.memory[0][1]
+        if self.turn:
+            PosX = self.memory[0][0]
+            PosY = self.memory[0][1]
 
-        valid = []
-        for i in range(PosX-1, PosX+2):
-            for j in range(PosY-1, PosY+2):
-                valid.append([i,j])
+            valid = []
+            for i in range(PosX-1, PosX+2):
+                for j in range(PosY-1, PosY+2):
+                    valid.append([i,j])
 
-        if [x,y] in valid and [x,y] not in self.memory:
-            self.move(x,y)
+            if [x,y] in valid and [x,y] not in self.memory:
+                self.move(x,y)
+        else:
+            self.textbox.insert(tk.END,f"\nChua den luot ban!")
 
     def move(self, PosX, PosY):
+        self.turn = False
         x = self.memory[0][0]
         y = self.memory[0][1]
         self.Buts[x, y].config(command=partial(self.handleButPlaying, x=x, y=y))
