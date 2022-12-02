@@ -166,7 +166,7 @@ class Window(tk.Tk):
                 print([x,y])
                 self.size_mem[1] -= 1
                 # self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(x,y)).sending_data())
-        elif self.Buts[x, y]['text'] == "light1" and self.size_mem[1] > 0:
+        elif self.Buts[x, y]['text'] == "light1" and self.size_mem[1] > 1:
             if len(self.memory) == 0:    
                 self.memory.append(0)
             self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor,text="torch1")
