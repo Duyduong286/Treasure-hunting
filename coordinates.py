@@ -8,6 +8,9 @@ class Coordinates:
     def getPos(self):
         return self.x, self.y
 
+    def getArrPos(self):
+        return [self.x, self.y]
+
     def __str__(self):
         return f"Pos: ({self.x}, {self.y})"
 

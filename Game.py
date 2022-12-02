@@ -11,6 +11,14 @@ class User:
         self.ip = ip
         self.is_ready = False
         self.sock = None
+        self.memory = [0]
+        self.light_tor = [0] #only torch
+
+    def set_light_tor(self):
+        for PosX, PosY in self.memory[1:]:
+            for i in range(PosX-1, PosX+2):
+                for j in range(PosY-1, PosY+2):
+                    self.light_tor.append([i, j])
 
     def set_sock(self, sock):
         self.sock = sock
@@ -62,4 +70,12 @@ class Game:
         if user_1 and user_2 :
             return True
         return False
+
+    # def hanlde_collide():
+    #     user_1, user_2 = self.get_user()
+    
+    def sup_hanlde_collide(user : User, mem : list) -> list:
+        if user.memory[0] in mem:
+            return user.memory[0]
+        return [-1,-1]
 

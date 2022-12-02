@@ -174,6 +174,10 @@ class Window(tk.Tk):
                 self.textbox.insert(tk.END,f"\nDa den luot cua ban!")
                 self.turn = True
 
+            elif rev_data['type'] == PKT_LOCATION_SHIP:
+                x,y = rev_data['location'].getPos()
+                self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo,text="ship")
+
         self.client_socket.close()
 
 
@@ -272,7 +276,7 @@ class Window(tk.Tk):
             self.size_mem[1] -= 1
         elif self.Buts[x, y]['text'] == "light2" and self.size_mem[2] > 0:
             if len(self.memory) == 0:    
-                self.memory.append(0)
+                self.memory.append([0,0])
             self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor,text="torch2")
             self.memory.append([x,y])
             print([x,y])

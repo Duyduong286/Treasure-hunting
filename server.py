@@ -32,6 +32,9 @@ def service_connection(key, mask):
         dict_data = unpack(recv_data)
         for _key in dict_data.keys():
             textbox.insert(tk.END,f"\n{str(_key) + ' : ' + str(dict_data[_key])}")
+
+        collect_data(dict_data, data.user)
+
         data.inb = b""
         data.inb += recv_data
         # if check_type(recv_data) == 0 and game.status == SETUP:
@@ -51,6 +54,14 @@ def service_connection(key, mask):
                     sent = sock.send(data.outb)  # Should be ready to write
                     data.outb = data.outb[sent:]
             data.inb = b""
+
+def collect_data(dict_data : list, user : User):
+    if dict_data['type'] == PKT_LOCATION_SHIP:
+        user.memory[0] = dict_data['location'].getArrPos()
+    elif dict_data['type'] == PKT_LOCATION_LIGHT:
+        if len(user.memory) == 0:
+            user.memory.append([0,0])
+        user.memory[1:] = dict_data['listloc']
 
 def close_connect(key):
     sock = key.fileobj
@@ -82,9 +93,17 @@ def sending_data(_type : int, user : User):
             game.status = PLAYING
     elif _type == PKT_MOVE and game.status == PLAYING:
         if user == game.get_user_1():
-            send_sock(game.get_user_2(),pkt_turn(game.get_user_2().uid).sending_data())
+            other = game.get_user_2()
+            send_sock(other,pkt_turn(other.uid).sending_data())
+            pos = game.sup_hanlde_collide(user,other.light_tor)
+            if pos != [-1, -1]:
+                # send_sock(game.get_user_1(), pkt_location_ship(game.get_user_1().uid,Coordinates(pos[0],pos[1])).sending_data())
+                send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
         else:
             send_sock(game.get_user_1(),pkt_turn(game.get_user_1().uid).sending_data())
+
+def hanlde_collide():
+    pass
 
 def send_sock(user, mess):
     # sent = sock.send(mess)
