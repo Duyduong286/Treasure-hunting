@@ -13,15 +13,15 @@ isRunning = True
 game = Game()
 
 def accept_wrapper(sock):
-    conn, addr = sock.accept()  # Should be ready to read
-    print(f"Accepted connection from {addr}")
-    textbox.insert(tk.END,f"\nAccepted connection from {addr}")
-    conn.setblocking(False)
-    id, user = game.set_user(addr)
-    data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"", user=user, uid=id)
-    events = selectors.EVENT_READ | selectors.EVENT_WRITE
-    sel.register(conn, events, data=data)
-    
+    if game.status == SETUP:
+        conn, addr = sock.accept()  # Should be ready to read
+        print(f"Accepted connection from {addr}")
+        textbox.insert(tk.END,f"\nAccepted connection from {addr}")
+        conn.setblocking(False)
+        id, user = game.set_user(addr)
+        data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"", user=user, uid=id)
+        events = selectors.EVENT_READ | selectors.EVENT_WRITE
+        sel.register(conn, events, data=data)
 
 def service_connection(key, mask):
     sock = key.fileobj
@@ -56,12 +56,20 @@ def service_connection(key, mask):
                     data.outb = data.outb[sent:]
             data.inb = b""
 
+    check_status_game()
+
 def check_status_game(**kwargs):
     if game.status == SETUP:
         game.remove_user(kwargs['id'] // 1000 - 1)
     
     if game.status == PLAYING:
+        if game.get_user() == [None, None]:
+            print(f"\nVan dau da ket thuc!!!")
+            textbox.insert(tk.END,f"\nVan dau da ket thuc!!!")
+            game.status == SETUP
+            return
         user = kwargs['user']
+        
         if user == game.get_user_1():
             other = game.get_user_2()
         else:
@@ -71,6 +79,7 @@ def check_status_game(**kwargs):
         pass
 
     if game.status == END:
+        game.status = SETUP
         pass
 
 def collect_data(dict_data : list, user : User):
