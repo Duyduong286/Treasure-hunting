@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import DISABLED
 from functools import partial
 import threading
 import socket
@@ -47,10 +48,6 @@ class Window(tk.Tk):
 
         self.textbox = tk.Text(frame4,width=50,height=50)
 
-        # Undo = tk.Button(frame1, text="Undo", width=10,  # nút quay lại
-        #                  command=partial(self.Undo, synchronized=True))
-        # Undo.grid(row=0, column=0, padx=30)
-
         tk.Label(frame1, text="MyID", pady=4).grid(row=0, column=0)
 
         # Khung nhập địa chỉ ip
@@ -74,16 +71,7 @@ class Window(tk.Tk):
         connectBT.grid(row=0, column=6, padx=3)
 
         self.startBT = tk.Button(frame1, text="Start", width=10,
-                              command=partial(self.handle_startBT))
-
-        # makeHostBT = tk.Button(frame1, text="MakeHost", width=10,  # nút tạo host
-        #                        command=lambda: self.Threading_socket.serverAction())
-        # makeHostBT.grid(row=0, column=4, padx=30)
-        # for x in range(Ox):   # tạo ma trận button Ox * Oy
-        #     for y in range(Oy):
-        #         self.Buts[x, y] = tk.Button(frame2, font=('arial', 15, 'bold'), height=1, width=2,
-        #                                     borderwidth=2, command=partial(self.handleButton, x=x, y=y))
-        #         self.Buts[x, y].grid(row=x, column=y)
+                              command=partial(self.handle_startBT, connectBT))
 
     def connectServer(self, host, port, frame):
         self.client_socket = socket.socket()  
@@ -137,14 +125,18 @@ class Window(tk.Tk):
                         except:
                             pass
 
-                for i in range(0,int(m/6)):
+                for i in range(int(m/5), int(m/5)+1):
+                    if posY != 0:
+                        i += 2 
                     for j in range(0,int(m)):
                         try:
-                            self.Buts[x+i, y+j].config(command=partial(self.set_pos_ship, x=x+i, y=y+j))
-                            self.Buts[x+i, y+j].config(height=36,width=28,image=self.photo_light,text="light1")
-                            self.Buts[x+i+8, y+j].config(command=partial(self.set_pos_ship, x=x+i+8, y=y+j))
-                            self.Buts[x+i+8, y+j].config(height=36,width=28,image=self.photo_light,text="light2")
-                            # self.memory.append([x,y])
+                            self.Buts[i, j].config(command=partial(self.set_pos_ship, x=i, y=j))
+                            self.Buts[i, j].config(height=36,width=28,image=self.photo_light,text="light1")
+                            self.Buts[i+4, j].config(command=partial(self.set_pos_ship, x=i+4, y=j))
+                            self.Buts[i+4, j].config(height=36,width=28,image=self.photo_light,text="light1")
+                            self.Buts[i+8, j].config(command=partial(self.set_pos_ship, x=i+8, y=j))
+                            self.Buts[i+8, j].config(height=36,width=28,image=self.photo_light,text="light2")
+                            #self.memory.append([x,y])
                         except:
                             pass        
 
@@ -190,13 +182,36 @@ class Window(tk.Tk):
                     self.set_light(self.memory,[])
 
             elif rev_data['type'] == PKT_LOCATION_LIGHT:
-                pass
-                # if len(self.enemies) == 0:
-                #     self.enemies[0] = 0
-                # for coor in rev_data['listloc']:
-                #     self.enemies.append(coor.getArrPos())
-                #     [x, y] = coor
-                #     self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor,text="torch_en")
+                if len(self.enemies) == 0:
+                    self.enemies[0] = 0
+                self.enemies = [self.enemies[0]]
+                for coor in rev_data['listloc']:
+                    self.enemies.append(coor.getArrPos())
+                    [x, y] = coor.getArrPos()
+                    self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor_en,text="torch_en")
+                # self.set_light(self.memory,[])
+
+            elif rev_data['type'] == PKT_WON:
+                if rev_data['res'] == PKT_WON_SHOOTED:
+                    self.textbox.insert(tk.END,f"\nWON! - SHOOTED")
+                elif rev_data['res'] == PKT_WON_TREASURE:
+                    self.textbox.insert(tk.END,f"\nWON! - TREASURE")
+                else:
+                    self.textbox.insert(tk.END,f"\nWON! - DISCONNECTED")
+
+            elif rev_data['type'] == PKT_LOSE:
+                if rev_data['res'] == PKT_WON_SHOOTED:
+                    self.textbox.insert(tk.END,f"\nLOSE! - SHOOTED")
+                elif rev_data['res'] == PKT_WON_TREASURE:
+                    self.textbox.insert(tk.END,f"\nLOSE! - TREASURE")
+                else:
+                    self.textbox.insert(tk.END,f"\nLOSE! - DISCONNECTED")
+
+            elif rev_data['type'] == PKT_CHECK:
+                self.textbox.insert(tk.END,f"\nVi tri ban khong hop le! - Tam ban: 6")
+                self.turn = True
+        # if rev_data['type'] in [PKT_LOCATION_SHIP, PKT_LOCATION_LIGHT]:
+        #     self.set_light(self.memory,[])
 
         self.client_socket.close()
 
@@ -205,6 +220,7 @@ class Window(tk.Tk):
         for x in range(self.Ox):   # tạo ma trận button Ox * Oy
             for y in range(self.Ox):
                 self.Buts[x, y].config(command=partial(self.handleButPlaying, x=x, y=y))
+                self.setBind(self.Buts[x, y], x, y)
                 if [x, y] not in self.memory and [x, y] not in self.mem_trea:
                     self.Buts[x, y].config(height=36,width=28,image=self.photo_fog,text="fog")
 
@@ -318,7 +334,8 @@ class Window(tk.Tk):
             self.Buts[x, y].config(height=36,width=28,image=self.photo_light,text="light2")
             self.size_mem[2] += 1
 
-    def handle_startBT(self):
+    def handle_startBT(self, button):
+        button["state"] = DISABLED
         self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(self.memory[0][0], self.memory[0][1])).sending_data())
 
         listloc=[]
@@ -333,54 +350,18 @@ class Window(tk.Tk):
             self.send_data(pkt_move(id=int(self.inputID.get()), location=Coordinates(x,y)).sending_data())
         pass
 
-    # def handleButton(self, x, y):
-    #     if self.Buts[x, y]['text'] == "": #Kiểm tra ô có ký tự rỗng hay không
-    #         if self.memory.count([x, y]) == 0:
-    #             self.memory.append([x, y])
-    #         if len(self.memory) % 2 == 1:
-    #             self.Buts[x, y]['text'] = 'O'
-    #             self.Threading_socket.sendData("{}|{}|{}|".format("hit", x, y))
-    #             if(self.checkWin(x, y, "O")):
-    #                 self.notification("Winner", "O")
-    #                 self.newGame()
-    #         else:
-    #             print(self.Threading_socket.name)
-    #             self.Buts[x, y]['text'] = 'X'
-    #             self.Threading_socket.sendData("{}|{}|{}|".format("hit", x, y))
-    #             if(self.checkWin(x, y, "X")):
-    #                 self.notification("Winner", "X")
-    #                 self.newGame()
+    def handleShoot(self, x, y, event):
+        if self.turn:
+            self.turn = False
+            self.textbox.insert(tk.END,f"\nShoot: ({x},{y})")
+            self.send_data(pkt_shoot(id=int(self.inputID.get()), location=Coordinates(x,y)).sending_data())
+            pass
 
-        
-
-    def notification(self, title, msg):
-        messagebox.showinfo(str(title), str(msg))
-
-    def checkWin(self, x, y, XO):
-        return False
-
-    def Undo(self, synchronized):
-        if(len(self.memory) > 0):
-            x = self.memory[len(self.memory) - 1][0]
-            y = self.memory[len(self.memory) - 1][1]
-            # print(x,y)
-            self.Buts[x, y]['text'] = ""
-            self.memory.pop()
-            if synchronized == True:
-                self.Threading_socket.sendData("{}|".format("Undo"))
-            print(self.memory)
-        else:
-            print("No character")
-
-    # def newGame(self):
-    #     for x in range(Ox):
-    #         for y in range(Oy):
-    #             self.Buts[x, y]["text"] = ""
+    def setBind(self, button, x, y):
+        button.bind("<Button-3>", partial(self.handleShoot, x, y))
 
 
 if __name__ == "__main__":
-    Ox = 20  # Số lượng ô theo trục X
-    Oy = 20 # Số lượng ô theo trục Y
     window = Window()
     window.showFrame()
     window.mainloop()

@@ -37,13 +37,6 @@ def service_connection(key, mask):
 
         data.inb = b""
         data.inb += recv_data
-        # if check_type(recv_data) == 0 and game.status == SETUP:
-
-        #         data.outb += recv_data
-            # else:
-            #     print(f"Closing connection to {data.addr}")
-            #     sel.unregister(sock)
-            #     sock.close()
     if mask & selectors.EVENT_WRITE:
         if data.inb:
             for pkt in sending_data(check_type(data.inb), data.user):
@@ -69,6 +62,9 @@ def collect_data(dict_data : list, user : User):
     elif dict_data['type'] == PKT_MOVE:
         user.memory[0] = dict_data['location'].getArrPos()
         textbox.insert(tk.END,f"\nUID: {user.uid}, MEM: {user.memory}")
+    elif dict_data['type'] == PKT_SHOOT:
+        user.shoot = dict_data['location'].getArrPos()
+        textbox.insert(tk.END,f"\nUID: {user.uid}, Shoot: {user.shoot}")
 
 def close_connect(key):
     sock = key.fileobj
@@ -94,7 +90,8 @@ def sending_data(_type : int, user : User):
         yield pkt_check_location(id=uid,check=1).sending_data()
         user.set_ready(True)
         if game.check_ready():
-            textbox.insert(tk.END,f"Ca hai da san sang")
+            textbox.insert(tk.END,f"\nCa hai da san sang")
+            textbox.insert(tk.END,f"\nVi tri cua kho bau: {game.pos_treasure}")
             send_sock(game.get_user_1(), pkt_treasure(Coordinates(18,8)).sending_data())
             send_sock(game.get_user_2(), pkt_treasure(Coordinates(18,8)).sending_data())
             game.status = PLAYING
@@ -105,24 +102,55 @@ def sending_data(_type : int, user : User):
         else:
             other = game.get_user_1()
         
-        send_sock(other,pkt_turn(other.uid).sending_data())
-        pos, enemy_pos = game.sup_hanlde_collide(user,other.light_tor, other)
-            # send_sock(game.get_user_1(), pkt_location_ship(game.get_user_1().uid,Coordinates(pos[0],pos[1])).sending_data())
-        send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
-        send_sock(user, pkt_location_ship(user.uid,Coordinates(enemy_pos[0][0],enemy_pos[0][1])).sending_data())
-        
-        if len(enemy_pos[1:]) > 0:
-            send_sock(user, pkt_location_light(user.uid, enemy_pos[1:]).sending_data())
+        if game.check_treasure(user):
+            send_sock(other, pkt_lose(other.uid,PKT_TREASURE).sending_data())
+            send_sock(user, pkt_won(user.uid,PKT_TREASURE).sending_data())
+        else:
+            send_sock(other,pkt_turn(other.uid).sending_data())
+            pos, enemy_pos = game.sup_hanlde_collide(user, other)
+                # send_sock(game.get_user_1(), pkt_location_ship(game.get_user_1().uid,Coordinates(pos[0],pos[1])).sending_data())
+            send_sock(other, pkt_location_ship(other.uid,Coordinates(pos[0],pos[1])).sending_data())
+            send_sock(user, pkt_location_ship(user.uid,Coordinates(enemy_pos[0][0],enemy_pos[0][1])).sending_data())
+            
+            listloc=[]
+            for [x, y] in enemy_pos[1:]:
+                listloc.append(Coordinates(x,y))
+            send_sock(user, pkt_location_light(user.uid, listloc).sending_data())
+    elif _type == PKT_SHOOT and game.status == PLAYING:
+        if user == game.get_user_1():
+            other = game.get_user_2()
+        else:
+            other = game.get_user_1()
 
+        if game.check_loc_shoot(user):
+            if game.checkShoot(user, other) :
+                textbox.insert(tk.END,f"\nUID: {other.uid} da bi ban trung")
+                send_sock(other, pkt_lose(other.uid,PKT_WON_SHOOTED).sending_data())
+                send_sock(user, pkt_won(user.uid,PKT_WON_SHOOTED).sending_data())
+            else:
+                send_sock(other,pkt_turn(other.uid).sending_data())
+        else:
+            yield pkt_check(user.uid, False).sending_data()
+
+
+
+        
 
 def hanlde_collide():
     pass
 
 def send_sock(user, mess):
     # sent = sock.send(mess)
-    print("sock",user.sock)
+    # print("sock",user.sock)
     user.sock.send(mess)
-    textbox.insert(tk.END,f"\nEchoing {mess!r} to {user.uid}")
+    # textbox.insert(tk.END,f"\nEchoing {unpack(mess)!r} to {user.uid}")
+
+    dict_data = unpack(mess)
+    textbox.insert(tk.END,f"\nEchoing to {user.uid}:")
+    print(f"\nEchoing to {user.uid}:")
+    for _key in dict_data.keys():
+        textbox.insert(tk.END,f"   {str(_key) + ' : ' + str(dict_data[_key])}")
+        print(f"   {str(_key) + ' : ' + str(dict_data[_key])}")
     pass
 
 

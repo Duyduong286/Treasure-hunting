@@ -15,8 +15,15 @@ PKT_TURN = 7
 PKT_MOVE = 8
 PKT_SHOOT = 9
 PKT_CHECK = 10
+PKT_WON = 11
+PKT_LOSE = 12
 
 MIN_SIZE = 10
+
+PKT_WON_SHOOTED = 1
+PKT_WON_TREASURE = 2
+PKT_WON_DISCON = 3
+
 
 class Header:
     header_len = 8
@@ -35,6 +42,8 @@ class Packet:
                 self.accept = kwargs["accept"]
             if "check" in list_keys:
                 self.n = kwargs["check"]
+            if "res" in list_keys:
+                self.n = kwargs["res"]
             if "n" in list_keys:
                 self.n = kwargs["n"]
             if "m" in list_keys:
@@ -217,7 +226,7 @@ def unpkt_shoot(mess) -> dict:
 
 def pkt_check(id : int, accept : bool) -> Packet:
     acc = 1 if accept else 0
-    header = Header(type=PKT_CHECK, length=4)
+    header = Header(type=PKT_CHECK, length=8)
     return Packet(header=header, id=id, accept=acc)
 
 def unpkt_check(mess) -> dict:
@@ -227,6 +236,32 @@ def unpkt_check(mess) -> dict:
         "len" : data[1],
         "id" : data[2],
         "check" : data[3]
+    }
+
+def pkt_won(id : int, res : int) -> Packet:
+    header = Header(type=PKT_WON, length=8)
+    return Packet(header=header, id=id, res=res)
+
+def unpkt_won(mess) -> dict:
+    data = unpacked_little_endian_data(length=16,lit_data=mess)
+    return {
+        "type" : data[0],
+        "len" : data[1],
+        "id" : data[2],
+        "res" : data[3]
+    }
+
+def pkt_lose(id : int, res : int) -> Packet:
+    header = Header(type=PKT_LOSE, length=8)
+    return Packet(header=header, id=id, res=res)
+
+def unpkt_lose(mess) -> dict:
+    data = unpacked_little_endian_data(length=16,lit_data=mess)
+    return {
+        "type" : data[0],
+        "len" : data[1],
+        "id" : data[2],
+        "res" : data[3]
     }
 
 def unpack(mess):
@@ -253,43 +288,10 @@ def unpack(mess):
         return unpkt_shoot(mess)
     elif chk_type == 10:
         return unpkt_check(mess)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    elif chk_type == 11:
+        return unpkt_won(mess)
+    elif chk_type == 12:
+        return unpkt_lose(mess)
 
 
 if __name__ == "__main__":
