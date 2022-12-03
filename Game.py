@@ -51,6 +51,13 @@ class Game:
             return id, self.users[1]
         return 0, None
 
+    def del_user(self, user : User):
+        try:
+            self.users.remove(user)
+            return True
+        except:
+            return False
+
     def get_user(self):
         return self.users[0], self.users[1]
 

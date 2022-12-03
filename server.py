@@ -28,15 +28,23 @@ def service_connection(key, mask):
     data = key.data
     data.user.set_sock(sock)
     if mask & selectors.EVENT_READ:
-        recv_data = sock.recv(1024)  # Should be ready to read
-        dict_data = unpack(recv_data)
-        for _key in dict_data.keys():
-            textbox.insert(tk.END,f"\n{str(_key) + ' : ' + str(dict_data[_key])}")
+        try:
+            recv_data = sock.recv(1024)  # Should be ready to read
+            dict_data = unpack(recv_data)
+            for _key in dict_data.keys():
+                textbox.insert(tk.END,f"\n{str(_key) + ' : ' + str(dict_data[_key])}")
 
-        collect_data(dict_data, data.user)
+            collect_data(dict_data, data.user)
 
-        data.inb = b""
-        data.inb += recv_data
+            data.inb = b""
+            data.inb += recv_data
+        except:
+            print(f"Disconnected to {data.addr}, UID: {data.uid}")
+            textbox.insert(tk.END,f"\nDisconnected to {data.addr}, UID: {data.uid}")
+            sel.unregister(sock)
+            sock.close()
+            check_status_game(id=data.uid, user= data.user)
+
     if mask & selectors.EVENT_WRITE:
         if data.inb:
             for pkt in sending_data(check_type(data.inb), data.user):
@@ -47,6 +55,23 @@ def service_connection(key, mask):
                     sent = sock.send(data.outb)  # Should be ready to write
                     data.outb = data.outb[sent:]
             data.inb = b""
+
+def check_status_game(**kwargs):
+    if game.status == SETUP:
+        game.remove_user(kwargs['id'] // 1000 - 1)
+    
+    if game.status == PLAYING:
+        user = kwargs['user']
+        if user == game.get_user_1():
+            other = game.get_user_2()
+        else:
+            other = game.get_user_1()
+
+        send_sock(other, pkt_won(other.uid,PKT_WON_DISCON).sending_data())
+        pass
+
+    if game.status == END:
+        pass
 
 def collect_data(dict_data : list, user : User):
     if dict_data['type'] == PKT_LOCATION_SHIP:
@@ -103,8 +128,9 @@ def sending_data(_type : int, user : User):
             other = game.get_user_1()
         
         if game.check_treasure(user):
-            send_sock(other, pkt_lose(other.uid,PKT_TREASURE).sending_data())
-            send_sock(user, pkt_won(user.uid,PKT_TREASURE).sending_data())
+            send_sock(other, pkt_lose(other.uid,PKT_WON_TREASURE).sending_data())
+            send_sock(user, pkt_won(user.uid,PKT_WON_TREASURE).sending_data())
+            game.status = END
         else:
             send_sock(other,pkt_turn(other.uid).sending_data())
             pos, enemy_pos = game.sup_hanlde_collide(user, other)
@@ -127,6 +153,7 @@ def sending_data(_type : int, user : User):
                 textbox.insert(tk.END,f"\nUID: {other.uid} da bi ban trung")
                 send_sock(other, pkt_lose(other.uid,PKT_WON_SHOOTED).sending_data())
                 send_sock(user, pkt_won(user.uid,PKT_WON_SHOOTED).sending_data())
+                game.status = END
             else:
                 send_sock(other,pkt_turn(other.uid).sending_data())
         else:

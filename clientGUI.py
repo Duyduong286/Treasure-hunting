@@ -66,19 +66,26 @@ class Window(tk.Tk):
         inputPort.grid(row=0, column=5, padx=5)
         inputPort.insert(0,"3456")
 
-        connectBT = tk.Button(frame1, text="Connect", width=10,
+        self.connectBT = tk.Button(frame1, text="Connect", width=10,
                               command=partial(self.connectServer,"127.0.0.1",3456, frame2))
-        connectBT.grid(row=0, column=6, padx=3)
+        self.connectBT.grid(row=0, column=6, padx=3)
 
         self.startBT = tk.Button(frame1, text="Start", width=10,
-                              command=partial(self.handle_startBT, connectBT))
+                              command=partial(self.handle_startBT, self.connectBT))                 
+
+    def disconnect(self):
+        self.client_socket.close()
+        self.isRunning = False
+        self.thread.join()
+        self.alert("Warning", "Warning", "DISCONNECTED")
 
     def connectServer(self, host, port, frame):
+        self.connectBT.config(text="Disconnect",command=self.disconnect) 
         self.client_socket = socket.socket()  
         self.client_socket.connect((host, port))  
         self.isRunning = True
-        t2 = threading.Thread(target=self.createThreadClient, args=(frame,))
-        t2.start()
+        self.thread = threading.Thread(target=self.createThreadClient, args=(frame,))
+        self.thread.start()
 
     def alert(self, type, title, mess):
         if type == "Information":
@@ -92,7 +99,7 @@ class Window(tk.Tk):
         self.client_socket.send(pkt_hello().sending_data())  
         while self.isRunning :
             rev_pkt = self.client_socket.recv(1024)
-            
+
             rev_data = unpack(rev_pkt)
         
             if rev_data['type'] == PKT_ACCEPT :
@@ -100,6 +107,7 @@ class Window(tk.Tk):
                     self.inputID.insert(0,rev_data['id'])
                 else:
                     print("Khong duoc chap nhan ket noi")
+                    self.alert("Error", "Error", "Khong duoc chap nhan ket noi!")
             elif rev_data['type'] == PKT_PLAYER :
                 self.Ox = rev_data['n']
                 for x in range(self.Ox):   # tạo ma trận button Ox * Oy
@@ -348,7 +356,6 @@ class Window(tk.Tk):
             self.size_mem[2] += 1
 
     def handle_startBT(self, button):
-        button["state"] = DISABLED
         self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(self.memory[0][0], self.memory[0][1])).sending_data())
 
         listloc=[]
