@@ -62,7 +62,7 @@ def check_status_game(**kwargs):
     if game.status == SETUP and 'remove' in kwargs.keys(): 
         game.remove_user(kwargs['id'] // 1000 - 1)
     
-    if game.status == PLAYING:
+    if game.status == PLAYING and 'user' in kwargs.keys():
         if game.get_user() == [None, None]:
             print(f"\nVan dau da ket thuc!!!")
             textbox.insert(tk.END,f"\nVan dau da ket thuc!!!")
