@@ -43,7 +43,7 @@ def service_connection(key, mask):
             textbox.insert(tk.END,f"\nDisconnected to {data.addr}, UID: {data.uid}")
             sel.unregister(sock)
             sock.close()
-            check_status_game(id=data.uid, user= data.user)
+            check_status_game(id=data.uid, user= data.user, remove= True)
 
     if mask & selectors.EVENT_WRITE:
         if data.inb:
@@ -59,7 +59,7 @@ def service_connection(key, mask):
     check_status_game()
 
 def check_status_game(**kwargs):
-    if game.status == SETUP:
+    if game.status == SETUP and 'remove' in kwargs.keys(): 
         game.remove_user(kwargs['id'] // 1000 - 1)
     
     if game.status == PLAYING:
