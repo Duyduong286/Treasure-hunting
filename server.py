@@ -79,6 +79,8 @@ def check_status_game(**kwargs):
         pass
 
     if game.status == END:
+        print(f"\nVan dau da ket thuc!!!")
+        textbox.insert(tk.END,f"\nVan dau da ket thuc!!!")
         game.status = SETUP
         pass
 
