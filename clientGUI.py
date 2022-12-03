@@ -95,7 +95,10 @@ class Window(tk.Tk):
         elif type == "Error":
             msg_box = messagebox.showerror(title, mess)
 
-        if msg_box == 'ok': self.destroy() 
+        if msg_box == 'ok':
+            if self.isRunning: 
+                self.disconnect(self)
+            self.destroy() 
 
     def createThreadClient(self, frame):
         self.client_socket.send(pkt_hello().sending_data())  
