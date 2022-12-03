@@ -89,11 +89,13 @@ class Window(tk.Tk):
 
     def alert(self, type, title, mess):
         if type == "Information":
-            messagebox.showinfo(title, mess)
+            msg_box = messagebox.showinfo(title, mess)
         elif type == "Warning":
-            messagebox.showwarning(title, mess)
+            msg_box = messagebox.showwarning(title, mess)
         elif type == "Error":
-            messagebox.showerror(title, mess)
+            msg_box = messagebox.showerror(title, mess)
+
+        if msg_box == 'ok': self.destroy() 
 
     def createThreadClient(self, frame):
         self.client_socket.send(pkt_hello().sending_data())  
