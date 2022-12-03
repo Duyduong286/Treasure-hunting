@@ -80,6 +80,14 @@ class Window(tk.Tk):
         t2 = threading.Thread(target=self.createThreadClient, args=(frame,))
         t2.start()
 
+    def alert(self, type, title, mess):
+        if type == "Information":
+            messagebox.showinfo(title, mess)
+        elif type == "Warning":
+            messagebox.showwarning(title, mess)
+        elif type == "Error":
+            messagebox.showerror(title, mess)
+
     def createThreadClient(self, frame):
         self.client_socket.send(pkt_hello().sending_data())  
         while self.isRunning :
@@ -194,16 +202,21 @@ class Window(tk.Tk):
             elif rev_data['type'] == PKT_WON:
                 if rev_data['res'] == PKT_WON_SHOOTED:
                     self.textbox.insert(tk.END,f"\nWON! - SHOOTED")
+                    self.alert("Information", "Congratulation!!!", "WIN\nBan da ban trung dich!")
                 elif rev_data['res'] == PKT_WON_TREASURE:
                     self.textbox.insert(tk.END,f"\nWON! - TREASURE")
+                    self.alert("Information", "Congratulation!!!", "WIN\nBan da tim thay kho bau!")
                 else:
                     self.textbox.insert(tk.END,f"\nWON! - DISCONNECTED")
+                    self.alert("Information", "Congratulation!!!", "WIN\nKe dich da roi tran chien!")
 
             elif rev_data['type'] == PKT_LOSE:
                 if rev_data['res'] == PKT_WON_SHOOTED:
                     self.textbox.insert(tk.END,f"\nLOSE! - SHOOTED")
+                    self.alert("Warning", "Disappointed!!!", "LOSE\nBan da bi ban trung!")
                 elif rev_data['res'] == PKT_WON_TREASURE:
                     self.textbox.insert(tk.END,f"\nLOSE! - TREASURE")
+                    self.alert("Warning", "Disappointed!!!", "LOSE\nKe dich da tim thay kho bau truoc ban!")
                 else:
                     self.textbox.insert(tk.END,f"\nLOSE! - DISCONNECTED")
 
@@ -260,7 +273,7 @@ class Window(tk.Tk):
                 for j in range(PosY-1, PosY+2):
                     valid.append([i,j])
 
-            if [x,y] in valid and [x,y] not in self.memory:
+            if [x,y] in valid and [x,y] not in self.memory and [x,y] not in self.enemies :
                 self.move(x,y)
         else:
             self.textbox.insert(tk.END,f"\nChua den luot ban!")
