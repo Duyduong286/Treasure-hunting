@@ -1,13 +1,14 @@
 import random
 from coordinates import Coordinates
 
-SETUP = 1
-PLAYING = 2
-END = 3
+SET_MATCH=99
+SETUP = 0
+PLAYING = 1
+END = 2
 
 class User:
     def __init__(self, id, ip):
-        self.status = SETUP
+        self.status = SET_MATCH
         self.uid = id
         self.ip = ip
         self.is_ready = False

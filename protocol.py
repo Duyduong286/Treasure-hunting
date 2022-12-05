@@ -265,7 +265,10 @@ def unpkt_lose(mess) -> dict:
     }
 
 def unpack(mess):
-    chk_type = check_type(mess)
+    try:
+        chk_type = check_type(mess)
+    except:
+        return None
     if chk_type == 0:
         return unpkt_hello(mess)
     elif chk_type == 1:

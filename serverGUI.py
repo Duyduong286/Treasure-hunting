@@ -3,6 +3,8 @@ from functools import partial
 from tkinter import messagebox
 import server
 import threading
+from server2csg import *
+import time
 
 class Window(tk.Tk):
     def __init__(self):
@@ -11,6 +13,8 @@ class Window(tk.Tk):
         self.textbox = None
         self.isRunning = False
         self.serverThread = None
+        self.server2csgThread = None
+        self.match = None
 
     def showFrame(self):
         frame1 = tk.Frame(self)
@@ -38,7 +42,9 @@ class Window(tk.Tk):
             label.config(text="Server is running!")
             connectBT.config(text="Stop")
             if not self.serverThread :
-                self.serverThread = threading.Thread(target=self.createThreadServer, args=("127.0.0.1",3456))
+                self.server2csgThread = threading.Thread(target=main_run)
+                self.server2csgThread.start()
+                self.serverThread = threading.Thread(target=self.createThreadServer, args=("127.0.0.1",PORT))
                 self.serverThread.start()
         else:
             self.isRunning = False

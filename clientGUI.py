@@ -66,9 +66,14 @@ class Window(tk.Tk):
         inputPort.grid(row=0, column=5, padx=5)
         inputPort.insert(0,"3456")
 
+        tk.Label(frame1, text="PASSWD", pady=4).grid(row=0, column=6)
+        inputPort = tk.Entry(frame1, width=20)
+        inputPort.grid(row=0, column=7, padx=5)
+        inputPort.insert(0,"123456")
+
         self.connectBT = tk.Button(frame1, text="Connect", width=10,
-                              command=partial(self.connectServer,"127.0.0.1",3456, frame2))
-        self.connectBT.grid(row=0, column=6, padx=3)
+                              command=partial(self.connectServer,inputIp.get(),int(inputPort.get()), frame2))
+        self.connectBT.grid(row=0, column=8, padx=3)
 
         self.startBT = tk.Button(frame1, text="Start", width=10,
                               command=partial(self.handle_startBT, self.connectBT))                 
@@ -96,9 +101,10 @@ class Window(tk.Tk):
             msg_box = messagebox.showerror(title, mess)
 
         if msg_box == 'ok':
-            if self.isRunning: 
-                self.disconnect(self)
             self.destroy() 
+            if self.isRunning: 
+                self.disconnect()
+            
 
     def createThreadClient(self, frame):
         self.client_socket.send(pkt_hello().sending_data())  
@@ -106,7 +112,8 @@ class Window(tk.Tk):
             rev_pkt = self.client_socket.recv(1024)
 
             rev_data = unpack(rev_pkt)
-        
+            if not rev_data:
+                continue
             if rev_data['type'] == PKT_ACCEPT :
                 if rev_data['accept']:
                     self.inputID.insert(0,rev_data['id'])
@@ -123,7 +130,7 @@ class Window(tk.Tk):
                         self.Buts[x, y].grid(row=x, column=y)
                 self.textbox.pack()
                 self.textbox.insert(tk.END,f"Hello!")
-                self.startBT.grid(row=0, column=7, padx=3)
+                self.startBT.grid(row=0, column=9, padx=3)
 
                 location = rev_data['location']
                 m = rev_data['m']

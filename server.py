@@ -7,12 +7,21 @@ import tkinter as tk
 from tkinter import Text
 import random 
 from Game import *
+from server2csg import *
 
 sel = selectors.DefaultSelector()
 isRunning = True
+connect2csg = True
 game = Game()
 
 def accept_wrapper(sock):
+    if game.status == SET_MATCH:
+        conn, addr = sock.accept()  # Should be ready to read
+        conn.setblocking(False)
+        data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"", user=User(0,0), uid=-1)
+        events = selectors.EVENT_READ | selectors.EVENT_WRITE
+        sel.register(conn, events, data=data)
+
     if game.status == SETUP:
         conn, addr = sock.accept()  # Should be ready to read
         print(f"Accepted connection from {addr}")
@@ -30,14 +39,24 @@ def service_connection(key, mask):
     if mask & selectors.EVENT_READ:
         try:
             recv_data = sock.recv(1024)  # Should be ready to read
-            dict_data = unpack(recv_data)
-            for _key in dict_data.keys():
-                textbox.insert(tk.END,f"\n{str(_key) + ' : ' + str(dict_data[_key])}")
+            if game.status == SET_MATCH:
+                global game_match
+                game_match = recv_data.decode()
+                if game_match:
+                    game.status = SETUP
+                    textbox.insert(tk.END,f"\nMATCH: {game_match}")
+                    textbox.insert(tk.END,f"\nGAME STATUS: SETUP")
+            else:
+                if not recv_data:
+                    return
+                dict_data = unpack(recv_data)
+                for _key in dict_data.keys():
+                    textbox.insert(tk.END,f"\n{str(_key) + ' : ' + str(dict_data[_key])}")
 
-            collect_data(dict_data, data.user)
+                collect_data(dict_data, data.user)
 
-            data.inb = b""
-            data.inb += recv_data
+                data.inb = b""
+                data.inb += recv_data
         except:
             print(f"Disconnected to {data.addr}, UID: {data.uid}")
             textbox.insert(tk.END,f"\nDisconnected to {data.addr}, UID: {data.uid}")
@@ -131,6 +150,8 @@ def sending_data(_type : int, user : User):
             send_sock(game.get_user_1(), pkt_treasure(Coordinates(18,8)).sending_data())
             send_sock(game.get_user_2(), pkt_treasure(Coordinates(18,8)).sending_data())
             game.status = PLAYING
+            if connect2csg:
+                asyncio.run(update(msg_begin(int(game_match))))
 
     elif _type == PKT_MOVE and game.status == PLAYING:
         if user == game.get_user_1():
@@ -142,6 +163,11 @@ def sending_data(_type : int, user : User):
             send_sock(other, pkt_lose(other.uid,PKT_WON_TREASURE).sending_data())
             send_sock(user, pkt_won(user.uid,PKT_WON_TREASURE).sending_data())
             game.status = END
+            if connect2csg:
+                if user.uid // 1000 == 1:
+                    asyncio.run(update(msg_score(int(game_match),3,999,0)))
+                else:
+                    asyncio.run(update(msg_score(int(game_match),3,0,999)))
         else:
             send_sock(other,pkt_turn(other.uid).sending_data())
             pos, enemy_pos = game.sup_hanlde_collide(user, other)
@@ -165,6 +191,11 @@ def sending_data(_type : int, user : User):
                 send_sock(other, pkt_lose(other.uid,PKT_WON_SHOOTED).sending_data())
                 send_sock(user, pkt_won(user.uid,PKT_WON_SHOOTED).sending_data())
                 game.status = END
+                if connect2csg:
+                    if user.uid // 1000 == 1:
+                        asyncio.run(update(msg_score(int(game_match),3,999,0)))
+                    else:
+                        asyncio.run(update(msg_score(int(game_match),3,0,999)))
             else:
                 send_sock(other,pkt_turn(other.uid).sending_data())
         else:
@@ -192,9 +223,13 @@ def send_sock(user, mess):
     pass
 
 
-def main(host, port, _textbox:Text):
+def main(host, port, _textbox:Text, **kwargs):
     global textbox
-    # host, port = "127.0.0.1", 12345
+    global game_match
+    if not connect2csg:
+        game.status = SETUP
+    else:
+        game.status = SET_MATCH
     lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     lsock.bind((host, port))
     lsock.listen()
