@@ -67,9 +67,9 @@ class Window(tk.Tk):
         inputPort.insert(0,"3456")
 
         tk.Label(frame1, text="PASSWD", pady=4).grid(row=0, column=6)
-        inputPort = tk.Entry(frame1, width=20)
-        inputPort.grid(row=0, column=7, padx=5)
-        inputPort.insert(0,"123456")
+        inputPass = tk.Entry(frame1, width=20)
+        inputPass.grid(row=0, column=7, padx=5)
+        inputPass.insert(0,"123456")
 
         self.connectBT = tk.Button(frame1, text="Connect", width=10,
                               command=partial(self.connectServer,inputIp.get(),int(inputPort.get()), frame2))
