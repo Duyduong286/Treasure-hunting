@@ -11,7 +11,7 @@ from server2csg import *
 
 sel = selectors.DefaultSelector()
 isRunning = True
-connect2csg = True
+connect2csg = False
 game = Game()
 
 def accept_wrapper(sock):
@@ -135,20 +135,20 @@ def sending_data(_type : int, user : User):
         # if game.user1.status 
         if uid:
             yield pkt_accept(uid,True).sending_data()
-            yield pkt_player(id=uid,n=20,m=20,k=8,location=Coordinates(4,0)).sending_data()
+            yield pkt_player(id=uid, n=config.N, m=config.M, k=config.K, location=config.LOCATION_PLAYER).sending_data()
         else:
-            yield pkt_accept(0,False).sending_data()
+            yield pkt_accept(config.UNACCEPT, False).sending_data()
     elif _type == PKT_LOCATION_SHIP and game.status == SETUP:
-        yield pkt_check_location(id=uid,check=1).sending_data()
+        yield pkt_check_location(id=uid, check=config.CHECK).sending_data()
 
     elif _type == PKT_LOCATION_LIGHT and game.status == SETUP:
-        yield pkt_check_location(id=uid,check=1).sending_data()
+        yield pkt_check_location(id=uid, check=config.CHECK).sending_data()
         user.set_ready(True)
         if game.check_ready():
             textbox.insert(tk.END,f"\nCa hai da san sang")
             textbox.insert(tk.END,f"\nVi tri cua kho bau: {game.pos_treasure}")
-            send_sock(game.get_user_1(), pkt_treasure(Coordinates(18,8)).sending_data())
-            send_sock(game.get_user_2(), pkt_treasure(Coordinates(18,8)).sending_data())
+            send_sock(game.get_user_1(), pkt_treasure(config.TREASURE_LOCATION).sending_data())
+            send_sock(game.get_user_2(), pkt_treasure(config.TREASURE_LOCATION).sending_data())
             game.status = PLAYING
             if connect2csg:
                 asyncio.run(update(msg_begin(int(game_match))))

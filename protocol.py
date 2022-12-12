@@ -1,7 +1,5 @@
-import socket
-import sys
+import config
 import struct
-import math
 from coordinates import Coordinates
 
 PKT_HELLO = 0
@@ -86,8 +84,13 @@ def pkt_hello() -> Packet:
     return Packet(header=header)
 
 def unpkt_hello(mess) -> Packet:
-    header = Header(type=PKT_HELLO, length=0)
-    data = unpacked_little_endian_data(length=8,lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=8,lit_data=mess)
+    except:
+        return {
+            "type" : PKT_HELLO,
+            "len" : config.DEFAULT,
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -99,7 +102,16 @@ def pkt_accept(id : int, accept : bool) -> Packet:
     return Packet(header=header, id=id, accept=acc)
 
 def unpkt_accept(mess) -> dict:
-    data = unpacked_little_endian_data(length=16,lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=16,lit_data=mess)
+    except:
+        return {
+            "type" : PKT_ACCEPT,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "accept" : config.ACCEPT
+        }
+
     return {
         "type" : data[0],
         "len" : data[1],
@@ -108,15 +120,22 @@ def unpkt_accept(mess) -> dict:
     }
 
 def pkt_player(id : int, n : int, m : int, k : int, location : Coordinates) -> Packet:
-    #m vi tri o co the chon
-    #n kich thuoc ban do
-    #k so luong o chon
     header = Header(type=PKT_PLAYER, length=24)      
-
     return Packet(header=header, id=id, n=n, m=m, k=k, location=location)
 
 def unpkt_player(mess) -> dict:
-    data = unpacked_little_endian_data(length=32, lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=32, lit_data=mess)
+    except:
+        return {
+            "type" : PKT_PLAYER,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "n" : config.N,
+            "m" : config.M,
+            "k" : config.K,
+            "location" : config.LOCATION_PLAYER
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -132,7 +151,15 @@ def pkt_location_ship(id : int, location : Coordinates) -> Packet:
     return Packet(header=header, id=id, location=location)
 
 def unpkt_location_ship(mess) -> dict:
-    data = unpacked_little_endian_data(length=20, lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=20, lit_data=mess)
+    except:
+        return {
+            "type" : PKT_LOCATION_SHIP,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "location" : config.DEFAULT_LOCATION
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -145,7 +172,15 @@ def pkt_check_location(id : int, check : int) -> Packet:
     return Packet(header=header, id=id, check=check)
 
 def unpkt_check_location(mess) -> dict:
-    data = unpacked_little_endian_data(length=16, lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=16, lit_data=mess)
+    except:
+        return {
+            "type" : PKT_CHECK_LOCATION,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "check" : config.CHECK
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -158,7 +193,14 @@ def pkt_treasure(location : Coordinates) -> Packet:
     return Packet(header=header, location=location)
 
 def unpkt_treasure(mess):
-    data = unpacked_little_endian_data(length=16, lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=16, lit_data=mess)
+    except:
+        return {
+            "type" : PKT_TREASURE,
+            "len" : config.DEFAULT,
+            "location" : config.TREASURE_LOCATION
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -171,7 +213,15 @@ def pkt_location_light(id : int, listloc : list) -> Packet:
     return Packet(header=header, id=id, listloc=listloc) 
 
 def unpkt_location_light(mess) -> dict:
-    data = unpacked_little_endian_data(length=len(mess), lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=len(mess), lit_data=mess)
+    except:
+        return {
+            "type" : PKT_LOCATION_LIGHT,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "listloc" : []
+        }
     k = (len(mess)-12)/8
     listloc = []
     try:
@@ -191,7 +241,14 @@ def pkt_turn(id : int) -> Packet:
     return Packet(header=header, id=id)
 
 def unpkt_turn(mess) -> Packet:
-    data = unpacked_little_endian_data(length=12, lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=12, lit_data=mess)
+    except:
+        return {
+            "type" : PKT_TURN,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -203,7 +260,15 @@ def pkt_move(id : int, location : Coordinates) -> Packet:
     return Packet(header=header, id=id, location=location)
 
 def unpkt_move(mess) -> dict:
-    data = unpacked_little_endian_data(length=20, lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=20, lit_data=mess)
+    except:
+        return {
+            "type" : PKT_MOVE,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "location" : config.DEFAULT_LOCATION
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -216,7 +281,15 @@ def pkt_shoot(id : int, location : Coordinates) -> Packet:
     return Packet(header=header, id=id, location=location)
 
 def unpkt_shoot(mess) -> dict:
-    data = unpacked_little_endian_data(length=20, lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=20, lit_data=mess)
+    except:
+        return {
+            "type" : PKT_SHOOT,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "location" : config.DEFAULT_LOCATION
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -230,7 +303,15 @@ def pkt_check(id : int, accept : bool) -> Packet:
     return Packet(header=header, id=id, accept=acc)
 
 def unpkt_check(mess) -> dict:
-    data = unpacked_little_endian_data(length=16,lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=16,lit_data=mess)
+    except:
+        return {
+            "type" : PKT_CHECK,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "check" : config.CHECK
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -243,7 +324,15 @@ def pkt_won(id : int, res : int) -> Packet:
     return Packet(header=header, id=id, res=res)
 
 def unpkt_won(mess) -> dict:
-    data = unpacked_little_endian_data(length=16,lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=16,lit_data=mess)
+    except:
+        return {
+            "type" : PKT_WON,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "res" : config.WON
+        }
     return {
         "type" : data[0],
         "len" : data[1],
@@ -256,7 +345,15 @@ def pkt_lose(id : int, res : int) -> Packet:
     return Packet(header=header, id=id, res=res)
 
 def unpkt_lose(mess) -> dict:
-    data = unpacked_little_endian_data(length=16,lit_data=mess)
+    try:
+        data = unpacked_little_endian_data(length=16,lit_data=mess)
+    except:
+        return {
+            "type" : PKT_LOSE,
+            "len" : config.DEFAULT,
+            "id" : config.DEFAULT,
+            "res" : config.WON
+        }
     return {
         "type" : data[0],
         "len" : data[1],
