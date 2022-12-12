@@ -72,7 +72,7 @@ async def echo(websocket):
             print("arr_match: ")
             for i in ARR_MATCH:
                 print(i)
-            await websocket.send(json.dumps(msg_info(ip=IP, port=PORT)))
+            await websocket.send(json.dumps(msg_info(ip='18.141.129.246', port=16251)))
         elif data["action"] == 2:
             check = True
             for mat in ARR_MATCH:
