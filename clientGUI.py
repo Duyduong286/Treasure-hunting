@@ -6,7 +6,7 @@ import socket
 from tkinter import messagebox
 from protocol import *
 import time
-
+import auto_config 
 class Window(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -412,48 +412,71 @@ class Window(tk.Tk):
 
     def auto(self):
         if self.uid - 2000 < 0 :
-            self.auto_uid_1()
+            for x,y in auto_config.LOCATION_1:
+                self.set_pos_ship(x,y)
+            # self.handle_startBT()
+            time.sleep(2)
+            self.auto_uid_1(auto_config.TURN_1)
         else:
-            self.auto_uid_2()
+            for x,y in auto_config.LOCATION_2:
+                self.set_pos_ship(x,y)
+            # self.handle_startBT()
+            time.sleep(2)
+            self.auto_uid_2(auto_config.TURN_2)
         pass
 
-    def auto_uid_1(self):
+    def auto_uid_1(self,listloc : list):
+        list_loc=listloc
+        count = 0
         while True:
-            if not self.isRunning:
-                break
+            # if not self.isRunning:
+            #     break
+            if self.turn:
+                time.sleep(1.5)  
+                Posx, Posy = self.memory[0]
+
+                if self.enemies[0] != 0:
+                    x ,y = self.enemies[0]
+                    self.handleShoot(x,y,None)
+                    break
+                
+
+                try:
+                    x,y = list_loc[count]
+                    self.handleButPlaying(x,y)
+                except:
+                    break
+
+
+                if [Posx, Posy] != self.memory[0]:
+                    count += 1
+
+        pass
+
+    def auto_uid_2(self,listloc):
+        list_loc=listloc
+        count = 0
+
+        while True:
+            # if not self.isRunning:
+            #     break
             if self.turn:
                 time.sleep(1.5)
-                x, y = self.memory[0]
-                y += 1
+                Posx, Posy = self.memory[0]
 
                 if self.enemies[0] != 0:
                     x ,y = self.enemies[0]
                     self.handleShoot(x,y,None)
                     break
 
-                if y > 19 :
+                try:
+                    x,y = list_loc[count]
+                    self.handleButPlaying(x,y)
+                except:
                     break
-                self.handleButPlaying(x, y)
-
-        pass
-
-    def auto_uid_2(self):
-        while True:
-            if not self.isRunning:
-                break
-            if self.turn:
-                time.sleep(1.5)
-                x, y = self.memory[0]
-                y -= 1
-
-                if self.enemies[0] != 0:
-                    x ,y = self.enemies[0]
-                    self.handleShoot(x,y,None)
-                    break
-
-                if y < 0 :
-                    break
-                self.handleButPlaying(x, y)
+                
+                if [Posx, Posy] != self.memory[0]:
+                    count += 1
             
         pass
 
