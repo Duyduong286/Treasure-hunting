@@ -59,7 +59,7 @@ class Window(tk.Tk):
         # Khung nhập địa chỉ ip
         inputIp = tk.Entry(frame1, width=20)
         inputIp.grid(row=0, column=3, padx=5)
-        inputIp.insert(0,"127.0.0.1")
+        inputIp.insert(0,"0.tcp.ap.ngrok.io")
 
         tk.Label(frame1, text="PORT", pady=4).grid(row=0, column=4)
         inputPort = tk.Entry(frame1, width=20)
@@ -420,12 +420,17 @@ class Window(tk.Tk):
             for x,y in auto_config.LOCATION_1:
                 self.set_pos_ship(x,y)
             # self.handle_startBT()
+            while not self.mem_trea:
+                pass
+
             time.sleep(2)
             self.auto_uid_1(auto_config.TURN_1)
         else:
             for x,y in auto_config.LOCATION_2:
                 self.set_pos_ship(x,y)
             # self.handle_startBT()
+            while not self.mem_trea:
+                pass
             time.sleep(2)
             self.auto_uid_2(auto_config.TURN_2)
         pass
