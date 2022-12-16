@@ -119,23 +119,33 @@ def unpkt_accept(mess) -> dict:
         "accept" : data[3]
     }
 
-def pkt_player(id : int, n : int, m : int, k : int, location : Coordinates) -> Packet:
-    header = Header(type=PKT_PLAYER, length=24)      
-    return Packet(header=header, id=id, n=n, m=m, k=k, location=location)
+def pkt_player(id : int, n : int, m : int, k : int, listloc : list) -> Packet:
+    M = len(listloc)
+    header = Header(type=PKT_PLAYER, length=4*M*2)      
+    return Packet(header=header, id=id, n=n, m=M, k=k, listloc=listloc)
 
 def unpkt_player(mess) -> dict:
+    # try:
+    data = unpacked_little_endian_data(length=len(mess), lit_data=mess)
+    # except:
+    #     return {
+    #         "type" : PKT_PLAYER,
+    #         "len" : config.DEFAULT,
+    #         "id" : config.DEFAULT,
+    #         "n" : config.N,
+    #         "m" : config.M,
+    #         "k" : config.K,
+    #         "location" : config.LOCATION_PLAYER
+    #     }
+
+    m = len(mess)-6*4
+    listloc = []
     try:
-        data = unpacked_little_endian_data(length=32, lit_data=mess)
+        for i in range(0,m,2):
+            listloc.append(Coordinates(data[6+i],data[7+i]))
     except:
-        return {
-            "type" : PKT_PLAYER,
-            "len" : config.DEFAULT,
-            "id" : config.DEFAULT,
-            "n" : config.N,
-            "m" : config.M,
-            "k" : config.K,
-            "location" : config.LOCATION_PLAYER
-        }
+        pass
+
     return {
         "type" : data[0],
         "len" : data[1],
@@ -143,7 +153,7 @@ def unpkt_player(mess) -> dict:
         "n" : data[3],
         "m" : data[4],
         "k" : data[5],
-        "location" : Coordinates(data[6], data[7])
+        "listloc" : listloc
     }
 
 def pkt_location_ship(id : int, location : Coordinates) -> Packet:
@@ -222,10 +232,10 @@ def unpkt_location_light(mess) -> dict:
             "id" : config.DEFAULT,
             "listloc" : []
         }
-    k = (len(mess)-12)/8
+    k = len(mess) - 3*4
     listloc = []
     try:
-        for i in range(0,int(k)+2,2):
+        for i in range(0,int(k),2):
             listloc.append(Coordinates(data[3+i],data[4+i]))
     except:
         pass

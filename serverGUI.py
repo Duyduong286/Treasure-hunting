@@ -1,10 +1,9 @@
 import tkinter as tk
 from functools import partial
-from tkinter import messagebox
 import server
 import threading
 from server2csg import *
-import time
+import liveGUI
 
 class Window(tk.Tk):
     def __init__(self):
@@ -15,10 +14,13 @@ class Window(tk.Tk):
         self.serverThread = None
         self.server2csgThread = None
         self.match = None
+        self.liveGUI = liveGUI.Window()
 
     def showFrame(self):
         frame1 = tk.Frame(self)
         frame1.pack()
+        frame3 = tk.Frame(self)
+        frame3.pack()
         frame2 = tk.Frame(self)
         frame2.pack()
 
@@ -32,9 +34,20 @@ class Window(tk.Tk):
         inputIp = tk.Entry(frame1, width=20)
         inputIp.grid(row=0, column=2, padx=5)
         inputIp.insert(0,"3456")
+        inputIp.config(state= "disabled")
         connectBT = tk.Button(frame1, text="Start", width=10)
         connectBT.config(command=partial(self.runServer, label, connectBT, inputIp.get()))
         connectBT.grid(row=0, column=3, padx=3)
+
+        liveBT = tk.Button(frame3, text="Live", width=20)
+        liveBT.config(command=partial(self.show_win))
+        liveBT.pack()
+
+    def show_win(self):
+        # self.liveGUI = liveGUI.Window()
+        # self.liveGUI.grab_set()
+        self.liveGUI.showFrame()
+        pass
 
     def runServer(self, label, connectBT, port):
         if not self.isRunning:
@@ -42,8 +55,9 @@ class Window(tk.Tk):
             label.config(text="Server is running!")
             connectBT.config(text="Stop")
             if not self.serverThread :
-                self.server2csgThread = threading.Thread(target=main_run)
-                self.server2csgThread.start()
+                if server.connect2csg:
+                    self.server2csgThread = threading.Thread(target=main_run)
+                    self.server2csgThread.start()
                 self.serverThread = threading.Thread(target=self.createThreadServer, args=("127.0.0.1",PORT))
                 self.serverThread.start()
         else:
@@ -56,10 +70,14 @@ class Window(tk.Tk):
             connectBT.config(text="Start")
 
     def createThreadServer(self, host, port):
-        server.main(host,port,self.textbox)
+        server.main(host,port,self.textbox, liveGUI = self.liveGUI)
         pass
 
 if __name__ == "__main__":
     window = Window()
     window.showFrame()
     window.mainloop()
+    window.liveGUI.grab_set()
+    window.liveGUI.showFrame()
+    # window.liveGUI.showFrame()
+    # window.liveGUI.mainloop()

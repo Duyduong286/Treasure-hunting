@@ -4,13 +4,13 @@ from functools import partial
 import threading
 import socket
 from tkinter import messagebox
-import time
 from protocol import *
-
+import time
 
 class Window(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.auto_play = False
         self.title("Client")
         self.isRunning = False
         self.inputID = None
@@ -76,12 +76,12 @@ class Window(tk.Tk):
         self.connectBT.grid(row=0, column=8, padx=3)
 
         self.startBT = tk.Button(frame1, text="Start", width=10,
-                              command=partial(self.handle_startBT, self.connectBT))                 
+                              command=partial(self.handle_startBT, self.connectBT))
+
+        self.autoBT = tk.Button(frame1, text="Auto", width=10,
+                              command=self.create_auto)   
 
     def disconnect(self):
-        self.client_socket.close()
-        self.isRunning = False
-        self.thread.join()
         self.alert("Warning", "Warning", "DISCONNECTED")
 
     def connectServer(self, host, port, frame):
@@ -101,9 +101,17 @@ class Window(tk.Tk):
             msg_box = messagebox.showerror(title, mess)
 
         if msg_box == 'ok':
+            self.client_socket.send(b'END')  
+             
+            if self.isRunning:
+                self.isRunning = False
+                try:
+                    self.thread.join() 
+                    self.client_socket.close()
+                except:
+                    pass
+ 
             self.destroy() 
-            if self.isRunning: 
-                self.disconnect()
             
 
     def createThreadClient(self, frame):
@@ -112,8 +120,10 @@ class Window(tk.Tk):
             rev_pkt = self.client_socket.recv(1024)
 
             rev_data = unpack(rev_pkt)
+
             if not rev_data:
                 continue
+            
             if rev_data['type'] == PKT_ACCEPT :
                 if rev_data['accept']:
                     self.inputID.insert(0,rev_data['id'])
@@ -131,10 +141,9 @@ class Window(tk.Tk):
                 self.textbox.pack()
                 self.textbox.insert(tk.END,f"Hello!")
                 self.startBT.grid(row=0, column=9, padx=3)
-
-                location = rev_data['location']
+                self.autoBT.grid(row=0, column=10, padx=3)
+                listloc = rev_data['listloc']
                 m = rev_data['m']
-                x, y = location.getPos()
                 self.textbox.insert(tk.END,f"\nVui long chon vi tri cua tau!")
                 
                 self.uid = rev_data['id']
@@ -153,21 +162,17 @@ class Window(tk.Tk):
                         except:
                             pass
 
-                for i in range(int(m/5), int(m/5)+1):
-                    if posY != 0:
-                        i += 2 
-                    for j in range(0,int(m)):
-                        try:
-                            self.Buts[i, j].config(command=partial(self.set_pos_ship, x=i, y=j))
-                            self.Buts[i, j].config(height=36,width=28,image=self.photo_light,text="light1")
-                            self.Buts[i+4, j].config(command=partial(self.set_pos_ship, x=i+4, y=j))
-                            self.Buts[i+4, j].config(height=36,width=28,image=self.photo_light,text="light1")
-                            self.Buts[i+8, j].config(command=partial(self.set_pos_ship, x=i+8, y=j))
-                            self.Buts[i+8, j].config(height=36,width=28,image=self.photo_light,text="light2")
-                            #self.memory.append([x,y])
-                        except:
-                            pass        
+                for coor in listloc:
+                    try:
+                        i,j = coor.getPos()                   
+                        self.Buts[i, j].config(command=partial(self.set_pos_ship, x=i, y=j))
 
+                        if i <= 10:
+                            self.Buts[i, j].config(height=36,width=28,image=self.photo_light,text="light1")
+                        else:
+                            self.Buts[i, j].config(height=36,width=28,image=self.photo_light,text="light2")
+                    except:
+                        pass
                 self.size_mem = [len(self.memory), int(rev_data['k']/2) , int(rev_data['k']/2), 1]
 
             elif rev_data['type'] == PKT_CHECK_LOCATION :
@@ -371,9 +376,12 @@ class Window(tk.Tk):
         self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(self.memory[0][0], self.memory[0][1])).sending_data())
 
         listloc=[]
+        print(self.memory[1:])
+        
         for pos in self.memory[1:]:
             listloc.append(Coordinates(pos[0], pos[1]))
 
+        print(listloc)
         self.send_data(pkt_location_light(id=int(self.inputID.get()),listloc=listloc).sending_data())    
     
     
@@ -391,6 +399,62 @@ class Window(tk.Tk):
 
     def setBind(self, button, x, y):
         button.bind("<Button-3>", partial(self.handleShoot, x, y))
+
+    def create_auto(self):
+        #dichuyen: handleButPlaying
+        #shoot:handleShoot
+        if not self.auto_play:
+            self.auto_play = False
+            self.textbox.insert(tk.END,f"\nAuto Play")
+            self.thread_auto = threading.Thread(target=self.auto)
+            self.thread_auto.start()
+
+    def auto(self):
+        if self.uid - 2000 < 0 :
+            self.auto_uid_1()
+        else:
+            self.auto_uid_2()
+        pass
+
+    def auto_uid_1(self):
+        while True:
+            if not self.isRunning:
+                break
+            if self.turn:
+                time.sleep(1.5)
+                x, y = self.memory[0]
+                y += 1
+
+                if self.enemies[0] != 0:
+                    x ,y = self.enemies[0]
+                    self.handleShoot(x,y,None)
+                    break
+
+                if y > 19 :
+                    break
+                self.handleButPlaying(x, y)
+
+        pass
+
+    def auto_uid_2(self):
+        while True:
+            if not self.isRunning:
+                break
+            if self.turn:
+                time.sleep(1.5)
+                x, y = self.memory[0]
+                y -= 1
+
+                if self.enemies[0] != 0:
+                    x ,y = self.enemies[0]
+                    self.handleShoot(x,y,None)
+                    break
+
+                if y < 0 :
+                    break
+                self.handleButPlaying(x, y)
+            
+        pass
 
 
 if __name__ == "__main__":
