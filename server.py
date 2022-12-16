@@ -10,7 +10,7 @@ import liveGUI
 
 sel = selectors.DefaultSelector()
 isRunning = True
-connect2csg = False
+connect2csg = True
 game = Game()
 
 def accept_wrapper(sock):

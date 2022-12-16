@@ -72,7 +72,7 @@ async def echo(websocket):
             print("arr_match: ")
             for i in ARR_MATCH:
                 print(i)
-            await websocket.send(json.dumps(msg_info(ip='18.141.129.246', port=16251)))
+            await websocket.send(json.dumps(msg_info(ip=game_info[0], port=game_info[1])))
         elif data["action"] == 2:
             check = True
             for mat in ARR_MATCH:
@@ -86,7 +86,9 @@ async def main():
     async with websockets.serve(echo, "localhost", 8765):
         await asyncio.Future()  # run forever
 
-def main_run():
+def main_run(ip, port):
+    global game_info
+    game_info = [ip, port]
     asyncio.run(main())
 
 def send_match(game_match : str):

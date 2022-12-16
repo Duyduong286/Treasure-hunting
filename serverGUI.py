@@ -24,9 +24,10 @@ class Window(tk.Tk):
         frame2 = tk.Frame(self)
         frame2.pack()
 
-        self.textbox = tk.Text(frame2,width=50,height=25)
+        self.textbox = tk.Text(frame2,width=60,height=25)
         self.textbox.pack()
         self.textbox.insert(tk.END,"Hello!")
+        
         # Khung nhập địa chỉ ip
         tk.Label(frame1, text="PORT:", pady=4).grid(row=0, column=1)
         label = tk.Label(frame1, text="Server stopped!", pady=4)
@@ -39,9 +40,18 @@ class Window(tk.Tk):
         connectBT.config(command=partial(self.runServer, label, connectBT, inputIp.get()))
         connectBT.grid(row=0, column=3, padx=3)
 
-        liveBT = tk.Button(frame3, text="Live", width=20)
+        tk.Label(frame3, text="PORT-GAME:", pady=4).grid(row=0, column=0, padx=3)
+        self.input_port = tk.Entry(frame3, width=20)
+        self.input_port.grid(row=0, column=1, padx=3)
+
+        tk.Label(frame3, text="IP-GAME:", pady=4).grid(row=0, column=2, padx=3)
+        self.input_ip = tk.Entry(frame3, width=20)
+        self.input_ip.grid(row=0, column=3, padx=3)
+        self.input_ip.insert(0,"0.tcp.ap.ngrok.io")
+
+        liveBT = tk.Button(frame3, text="Live", width=10, padx=4)
         liveBT.config(command=partial(self.show_win))
-        liveBT.pack()
+        liveBT.grid(row=0, column=4, padx=3)
 
     def show_win(self):
         # self.liveGUI = liveGUI.Window()
@@ -56,7 +66,7 @@ class Window(tk.Tk):
             connectBT.config(text="Stop")
             if not self.serverThread :
                 if server.connect2csg:
-                    self.server2csgThread = threading.Thread(target=main_run)
+                    self.server2csgThread = threading.Thread(target=main_run,args=(self.input_ip.get(), self.input_port.get()))
                     self.server2csgThread.start()
                 self.serverThread = threading.Thread(target=self.createThreadServer, args=("127.0.0.1",PORT))
                 self.serverThread.start()

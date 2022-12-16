@@ -221,6 +221,7 @@ class Window(tk.Tk):
                 for coor in rev_data['listloc']:
                     self.enemies.append(coor.getArrPos())
                     [x, y] = coor.getArrPos()
+            
                     self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor_en,text="torch_en")
                 # self.set_light(self.memory,[])
 
