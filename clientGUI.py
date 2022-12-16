@@ -221,8 +221,13 @@ class Window(tk.Tk):
                 for coor in rev_data['listloc']:
                     self.enemies.append(coor.getArrPos())
                     [x, y] = coor.getArrPos()
-            
+                try:
                     self.Buts[x, y].config(bg='#f0f0f0',height=36,width=28,image=self.photo_tor_en,text="torch_en")
+                except:
+                    if x > 2000:
+                        self.textbox.insert(tk.END,f"\nLOSE! - SHOOTED")
+                        self.alert("Warning", "Disappointed!!!", "LOSE\nBan da bi ban trung!")
+                    pass
                 # self.set_light(self.memory,[])
 
             elif rev_data['type'] == PKT_WON:
@@ -470,6 +475,8 @@ class Window(tk.Tk):
                     break
 
                 try:
+                    if len(list_loc) < 1:
+                        break
                     x,y = list_loc[count]
                     self.handleButPlaying(x,y)
                 except:
