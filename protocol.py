@@ -108,7 +108,7 @@ def unpkt_accept(mess) -> dict:
         return {
             "type" : PKT_ACCEPT,
             "len" : config.DEFAULT,
-            "id" : config.DEFAULT,
+            "id" : 0,
             "accept" : config.ACCEPT
         }
 
@@ -131,7 +131,7 @@ def unpkt_player(mess) -> dict:
         return {
             "type" : PKT_PLAYER,
             "len" : config.DEFAULT,
-            "id" : config.ID[1],
+            "id" : 0,
             "n" : config.N,
             "m" : config.M,
             "k" : config.K,

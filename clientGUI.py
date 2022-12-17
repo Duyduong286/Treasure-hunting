@@ -7,6 +7,8 @@ from tkinter import messagebox
 from protocol import *
 import time
 import auto_config 
+import config
+
 class Window(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -57,14 +59,14 @@ class Window(tk.Tk):
         tk.Label(frame1, text="IP", pady=4).grid(row=0, column=2)
 
         # Khung nhập địa chỉ ip
-        inputIp = tk.Entry(frame1, width=20)
-        inputIp.grid(row=0, column=3, padx=5)
-        inputIp.insert(0,"127.0.0.1")
+        self.inputIp = tk.Entry(frame1, width=20)
+        self.inputIp.grid(row=0, column=3, padx=5)
+        self.inputIp.insert(0,"0.tcp.ap.ngrok.io")
 
         tk.Label(frame1, text="PORT", pady=4).grid(row=0, column=4)
-        inputPort = tk.Entry(frame1, width=20)
-        inputPort.grid(row=0, column=5, padx=5)
-        inputPort.insert(0,"3456")
+        self.inputPort = tk.Entry(frame1, width=20)
+        self.inputPort.grid(row=0, column=5, padx=5)
+        self.inputPort.insert(0,"10139")
 
         tk.Label(frame1, text="PASSWD", pady=4).grid(row=0, column=6)
         inputPass = tk.Entry(frame1, width=20)
@@ -72,7 +74,7 @@ class Window(tk.Tk):
         inputPass.insert(0,"123456")
 
         self.connectBT = tk.Button(frame1, text="Connect", width=10,
-                              command=partial(self.connectServer, "127.0.0.1",3456, frame2))
+                              command=partial(self.connectServer, None, None, frame2))
         self.connectBT.grid(row=0, column=8, padx=3)
 
         self.startBT = tk.Button(frame1, text="Start", width=10,
@@ -87,7 +89,7 @@ class Window(tk.Tk):
     def connectServer(self, host, port, frame):
         self.connectBT.config(text="Disconnect",command=self.disconnect) 
         self.client_socket = socket.socket()  
-        self.client_socket.connect(("0.tcp.ap.ngrok.io", 10139))  
+        self.client_socket.connect((str(self.inputIp.get()).strip(),int(str(self.inputPort.get()).strip())))  
         self.isRunning = True
         self.thread = threading.Thread(target=self.createThreadClient, args=(frame,))
         self.thread.start()
@@ -132,7 +134,8 @@ class Window(tk.Tk):
             
             if rev_data['type'] == PKT_ACCEPT :
                 if rev_data['accept']:
-                    self.inputID.insert(0,rev_data['id'])
+                    if not rev_data['id']:
+                        self.inputID.insert(0,rev_data['id'])
                 else:
                     print("Khong duoc chap nhan ket noi")
                     self.alert("Error", "Error", "Khong duoc chap nhan ket noi!")
@@ -153,6 +156,16 @@ class Window(tk.Tk):
                 self.textbox.insert(tk.END,f"\nVui long chon vi tri cua tau!")
                 
                 self.uid = rev_data['id']
+                if self.uid <= 0 or not self.uid:
+                    if listloc[0][0] == 4 :
+                        self.uid = 1032
+                        self.inputID.insert(0,"1032")
+                    else:
+                        self.uid = 2039
+                        self.inputID.insert(0,"2039")
+
+
+
                 if self.uid - 2000 < 0 :
                     posX, posY = 0,0
                     self.turn = True
@@ -338,7 +351,7 @@ class Window(tk.Tk):
 
         self.set_light(self.memory, db_light)
 
-        self.send_data(pkt_move(id=int(self.inputID.get()), location=Coordinates(PosX,PosY)).sending_data())
+        self.send_data(pkt_move(id=self.uid, location=Coordinates(PosX,PosY)).sending_data())
 
 
     def send_data(self, data):
@@ -385,7 +398,7 @@ class Window(tk.Tk):
             self.size_mem[2] += 1
 
     def handle_startBT(self, button):
-        self.send_data(pkt_location_ship(id=int(self.inputID.get()),location=Coordinates(self.memory[0][0], self.memory[0][1])).sending_data())
+        self.send_data(pkt_location_ship(id=self.uid,location=Coordinates(self.memory[0][0], self.memory[0][1])).sending_data())
 
         listloc=[]
         print(self.memory[1:])
@@ -394,19 +407,19 @@ class Window(tk.Tk):
             listloc.append(Coordinates(pos[0], pos[1]))
 
         print(listloc)
-        self.send_data(pkt_location_light(id=int(self.inputID.get()),listloc=listloc).sending_data())    
+        self.send_data(pkt_location_light(id=self.uid,listloc=listloc).sending_data())    
     
     
     def handleButton(self, x, y):
         if self.Buts[x, y]['text'] == "fog":
-            self.send_data(pkt_move(id=int(self.inputID.get()), location=Coordinates(x,y)).sending_data())
+            self.send_data(pkt_move(id=self.uid, location=Coordinates(x,y)).sending_data())
         pass
 
     def handleShoot(self, x, y, event):
         if self.turn:
             self.turn = False
             self.textbox.insert(tk.END,f"\nShoot: ({x},{y})")
-            self.send_data(pkt_shoot(id=int(self.inputID.get()), location=Coordinates(x,y)).sending_data())
+            self.send_data(pkt_shoot(id=self.uid, location=Coordinates(x,y)).sending_data())
             pass
 
     def setBind(self, button, x, y):
