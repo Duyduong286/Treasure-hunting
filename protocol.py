@@ -125,26 +125,28 @@ def pkt_player(id : int, n : int, m : int, k : int, listloc : list) -> Packet:
     return Packet(header=header, id=id, n=n, m=M, k=k, listloc=listloc)
 
 def unpkt_player(mess) -> dict:
-    # try:
-    data = unpacked_little_endian_data(length=len(mess), lit_data=mess)
-    # except:
-    #     return {
-    #         "type" : PKT_PLAYER,
-    #         "len" : config.DEFAULT,
-    #         "id" : config.DEFAULT,
-    #         "n" : config.N,
-    #         "m" : config.M,
-    #         "k" : config.K,
-    #         "location" : config.LOCATION_PLAYER
-    #     }
+    try:
+        data = unpacked_little_endian_data(length=len(mess), lit_data=mess)
+    except:
+        return {
+            "type" : PKT_PLAYER,
+            "len" : config.DEFAULT,
+            "id" : config.ID[1],
+            "n" : config.N,
+            "m" : config.M,
+            "k" : config.K,
+            "listloc" : config.ROW_2
+        }
 
     m = len(mess)-6*4
     listloc = []
-    try:
-        for i in range(0,m,2):
+    for i in range(0,m,2):
+        try:
             listloc.append(Coordinates(data[6+i],data[7+i]))
-    except:
-        pass
+        except:
+            print('player')
+            break
+
 
     return {
         "type" : data[0],
@@ -234,11 +236,13 @@ def unpkt_location_light(mess) -> dict:
         }
     k = len(mess) - 3*4
     listloc = []
-    try:
-        for i in range(0,int(k),2):
+
+    for i in range(0,int(k),2):
+        try:
             listloc.append(Coordinates(data[3+i],data[4+i]))
-    except:
-        pass
+        except:
+            pass
+        
     return {
         "type" : data[0],
         "len" : data[1],

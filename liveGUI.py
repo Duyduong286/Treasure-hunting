@@ -47,11 +47,11 @@ class Window(tk.Toplevel):
         frame3 = tk.Frame(self)
         frame3.pack(side=RIGHT,padx=10, pady=10)
 
-        tk.Label(frame_top, text = "TURN:", font=('arial', 15)).pack(side=LEFT) 
-        self.label_turn = tk.Label(frame_top, text = "UID1", font=('arial', 15))
-        self.label_turn.pack(side=LEFT)
+        # tk.Label(frame_top, text = "TURN:", font=('arial', 15)).pack(side=LEFT) 
+        # self.label_turn = tk.Label(frame_top, text = "UID1", font=('arial', 15))
+        # self.label_turn.pack(side=LEFT)
 
-        tk.Button(frame_top,text="turn",command=partial(self.set_turn, "hi")).pack(side=LEFT)
+        # tk.Button(frame_top,text="turn",command=partial(self.set_turn, "hi")).pack(side=LEFT)
 
         tk.Label(frame3, image=self.photo_battle).pack()
         self.setMap(frame1, self.Buts_left, 20, 20, "UID1")

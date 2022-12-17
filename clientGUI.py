@@ -59,7 +59,7 @@ class Window(tk.Tk):
         # Khung nhập địa chỉ ip
         inputIp = tk.Entry(frame1, width=20)
         inputIp.grid(row=0, column=3, padx=5)
-        inputIp.insert(0,"0.tcp.ap.ngrok.io")
+        inputIp.insert(0,"127.0.0.1")
 
         tk.Label(frame1, text="PORT", pady=4).grid(row=0, column=4)
         inputPort = tk.Entry(frame1, width=20)
@@ -72,7 +72,7 @@ class Window(tk.Tk):
         inputPass.insert(0,"123456")
 
         self.connectBT = tk.Button(frame1, text="Connect", width=10,
-                              command=partial(self.connectServer,inputIp.get(),int(inputPort.get()), frame2))
+                              command=partial(self.connectServer, "127.0.0.1",3456, frame2))
         self.connectBT.grid(row=0, column=8, padx=3)
 
         self.startBT = tk.Button(frame1, text="Start", width=10,
