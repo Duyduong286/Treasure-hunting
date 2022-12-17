@@ -87,7 +87,7 @@ class Window(tk.Tk):
     def connectServer(self, host, port, frame):
         self.connectBT.config(text="Disconnect",command=self.disconnect) 
         self.client_socket = socket.socket()  
-        self.client_socket.connect((host, port))  
+        self.client_socket.connect(("0.tcp.ap.ngrok.io", 10139))  
         self.isRunning = True
         self.thread = threading.Thread(target=self.createThreadClient, args=(frame,))
         self.thread.start()
@@ -117,10 +117,16 @@ class Window(tk.Tk):
     def createThreadClient(self, frame):
         self.client_socket.send(pkt_hello().sending_data())  
         while self.isRunning :
+
             rev_pkt = self.client_socket.recv(1024)
-
             rev_data = unpack(rev_pkt)
-
+            try:
+                if check_type(rev_pkt) == 1 and len(rev_pkt) > 100:
+                    rev_data = unpack(rev_pkt[16:])
+                if check_type(rev_pkt) == PKT_CHECK_LOCATION and len(rev_pkt) > 35:
+                    rev_data = unpack(rev_pkt[32:])
+            except:
+                pass
             if not rev_data:
                 continue
             
